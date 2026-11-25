@@ -13,7 +13,11 @@ const COLORS: Record<string, string> = {
 export function Badge({ estado, label }: { estado: string; label?: string }) {
   return <span className={`inline-flex items-center whitespace-nowrap rounded-full border px-2.5 py-0.5 text-xs font-medium ${COLORS[estado] ?? CX}`}>{label ?? estado}</span>
 }
-export const fmt = (v: any) => (v == null || v === '' ? '—' : String(v).replace('T', ' ').slice(0, String(v).length > 10 ? 16 : 10))
+export const fmt = (v: any) => {
+  if (v == null || v === '') return '—'
+  const t = String(v)
+  return /^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}(:\d{2})?)?$/.test(t) ? t.replace('T', ' ').slice(0, t.length > 10 ? 16 : 10) : t
+}
 export function DataTable({ cols, rows, empty = 'Sin registros.' }: { cols: string[]; rows: Record<string, any>[]; empty?: string }) {
   return (
     <section className={card + ' overflow-x-auto'}>

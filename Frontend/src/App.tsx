@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { AlertTriangle, Bell, ClipboardCheck, ClipboardList, Construction, Database, FileBarChart, HardHat, LogOut, PackageCheck, ScrollText, ShoppingCart, Truck, Users, Wrench, Zap } from 'lucide-react'
+import { AlertTriangle, Briefcase, Building2, Cpu, Factory, FileSpreadsheet, MapPin, Package, ShieldCheck, Tags, Bell, ClipboardCheck, ClipboardList, Construction, Database, FileBarChart, HardHat, LogOut, PackageCheck, ScrollText, ShoppingCart, Truck, Users, Wrench, Zap } from 'lucide-react'
 import Checklist from './views/Checklist'
 import Verificacion from './views/Verificacion'
 import Retorno from './views/Retorno'
@@ -18,7 +18,7 @@ const GROUPS = [
   { name: 'Reportes', items: ['Faltantes Recurrentes', 'Equipos en Terreno', 'Consumo por OT/Cliente'] },
   { name: 'Sistema', items: ['Alertas', 'Bitácora de Cambios'] },
 ]
-const ICONS: Record<string, typeof Bell> = { 'Armado de Checklist': ClipboardList, 'Verificación y Salida': ClipboardCheck, 'Retorno y Conciliación': PackageCheck, 'Mantención y Calibración': Wrench, 'Requerimiento de Compra': ShoppingCart, Vehículos: Truck, Personal: HardHat, Usuarios: Users, Alertas: AlertTriangle, 'Bitácora de Cambios': ScrollText }
+const ICONS: Record<string, typeof Bell> = { 'Armado de Checklist': ClipboardList, 'Verificación y Salida': ClipboardCheck, 'Retorno y Conciliación': PackageCheck, 'Mantención y Calibración': Wrench, 'Requerimiento de Compra': ShoppingCart, Clientes: Building2, Faenas: MapPin, Proveedores: Factory, 'Tipos de Trabajo': Briefcase, Categorías: Tags, Ítems: Package, 'Unidades de Equipo': Cpu, Roles: ShieldCheck, 'Plantilla de Ítems': FileSpreadsheet, Vehículos: Truck, Personal: HardHat, Usuarios: Users, Alertas: AlertTriangle, 'Bitácora de Cambios': ScrollText }
 type Toast = { kind: 'ok' | 'err'; text: string; notes: string[] }
 type Session = { ID_USUARIO: number; ID_ROL: number; ROL: string; NOMBRE_PERSONA: string }
 

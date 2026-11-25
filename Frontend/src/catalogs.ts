@@ -7,8 +7,8 @@ export type Field = {
 }
 export type Cat = { table: T; nuevo: string; fields: Field[] }
 
-const AI: [string, string][] = [['A', 'A — Activo'], ['I', 'I — Inactivo']]
-const SN: [string, string][] = [['S', 'S — Sí'], ['N', 'N — No']]
+const AI: [string, string][] = [['A', 'Activo'], ['I', 'Inactivo']]
+const SN: [string, string][] = [['S', 'Sí'], ['N', 'No']]
 const txt = (key: string, max: number, req = true): Field => ({ key, type: 'text', max, req })
 
 export const CATALOGS: Record<string, Cat> = {

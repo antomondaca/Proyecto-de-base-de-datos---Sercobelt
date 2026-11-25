@@ -164,15 +164,15 @@ function addAlerta(d: DB, a: { ID_OT: number | null; ID_UNIDAD: number | null; T
   return id
 }
 
-// ---- TRIGGER _ALERTA_CALIBRACION
+// ---- TRIGGER ALERTA_CALIBRACION
 function trgCalibracion(d: DB, u: Row) {
   if (u.FECHA_PROXIMA_CALIBRACION && u.FECHA_PROXIMA_CALIBRACION < nowTs()) {
     const id = addAlerta(d, { ID_OT: null, ID_UNIDAD: u.ID_UNIDAD, TIPO: 'Calibración vencida', MENSAJE: `El equipo ${u.CODIGO} tiene su fecha de calibración vencida.` })
-    fired.push(`_ALERTA_CALIBRACION: alerta #${id} "Calibración vencida" para ${u.CODIGO}`)
+    fired.push(`ALERTA_CALIBRACION: alerta #${id} "Calibración vencida" para ${u.CODIGO}`)
   }
 }
 
-// ---- TRIGGERS de CHECKLIST_DETALLE (VALIDAR_EQUIPO_BODEGA, ESTADO_UNIDAD_EQUIPO, _ALERTA_RETORNO_INCOMPLETO)
+// ---- TRIGGERS de CHECKLIST_DETALLE (VALIDAR_EQUIPO_BODEGA, ESTADO_UNIDAD_EQUIPO, ALERTA_RETORNO_INCOMPLETO)
 function updDetalle(d: DB, id: number, patch: Row) {
   const row = find(d, 'CHECKLIST_DETALLE', id)
   const old = { ...row }
@@ -197,7 +197,7 @@ function updDetalle(d: DB, id: number, patch: Row) {
   }
   if ((cols.includes('CANTIDAD_RETORNADA') || cols.includes('ESTADO_ITEM')) && nw.ESTADO_ITEM === 'Faltante' && nw.CANTIDAD_RETORNADA != null) {
     const aid = addAlerta(d, { ID_OT: nw.ID_OT, ID_UNIDAD: nw.ID_UNIDAD, TIPO: 'Faltante', MENSAJE: `Retorno incompleto en el detalle ID ${nw.ID_DETALLE}` })
-    fired.push(`_ALERTA_RETORNO_INCOMPLETO: alerta #${aid} "Faltante" (detalle ${nw.ID_DETALLE})`)
+    fired.push(`ALERTA_RETORNO_INCOMPLETO: alerta #${aid} "Faltante" (detalle ${nw.ID_DETALLE})`)
   }
 }
 
