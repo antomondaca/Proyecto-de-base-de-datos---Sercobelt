@@ -1,0 +1,1539 @@
+----------------------------------------------------------------------TABLAS-----------------------------------------------------------------------------------
+CREATE TABLE ROL (
+    ID_ROL NUMBER,
+    NOMBRE_ROL VARCHAR2(30) NOT NULL,
+    CONSTRAINT PK_ROL PRIMARY KEY (ID_ROL)
+);
+/
+
+CREATE TABLE PERSONAL (
+    ID_PERSONAL NUMBER,
+    RUT VARCHAR2(12) NOT NULL,
+    NOMBRE VARCHAR2(100) NOT NULL,
+    CARGO VARCHAR2(50) NOT NULL,
+    ESTADO CHAR(1) NOT NULL,
+    CONSTRAINT PK_PERSONAL PRIMARY KEY (ID_PERSONAL)
+);
+/
+
+CREATE TABLE CLIENTE (
+    ID_CLIENTE NUMBER,
+    RUT VARCHAR2(12) NOT NULL,
+    RAZON_SOCIAL VARCHAR2(120) NOT NULL,
+    CONTACTO VARCHAR2(100),
+    EMAIL VARCHAR2(100),
+    TELEFONO VARCHAR2(20),
+    CONSTRAINT PK_CLIENTE PRIMARY KEY (ID_CLIENTE)
+);
+/
+
+CREATE TABLE PROVEEDOR (
+    ID_PROVEEDOR NUMBER,
+    RUT VARCHAR2(12) NOT NULL,
+    RAZON_SOCIAL VARCHAR2(120) NOT NULL,
+    CONTACTO VARCHAR2(100),
+    TELEFONO VARCHAR2(20),
+    CONSTRAINT PK_PROVEEDOR PRIMARY KEY (ID_PROVEEDOR)
+);
+/
+
+CREATE TABLE VEHICULO (
+    ID_VEHICULO NUMBER,
+    PATENTE VARCHAR2(10) NOT NULL,
+    TIPO VARCHAR2(40) NOT NULL,
+    ESTADO CHAR(1) NOT NULL,
+    CONSTRAINT PK_VEHICULO PRIMARY KEY (ID_VEHICULO)
+);
+/
+
+CREATE TABLE TIPO_TRABAJO (
+    ID_TIPO_TRABAJO NUMBER,
+    NOMBRE VARCHAR2(80) NOT NULL,
+    DESCRIPCION VARCHAR2(250),
+    CONSTRAINT PK_TIPO_TRABAJO PRIMARY KEY (ID_TIPO_TRABAJO)
+);
+/
+
+CREATE TABLE CATEGORIA_ITEM (
+    ID_CATEGORIA NUMBER,
+    NOMBRE VARCHAR2(40) NOT NULL,
+    ES_RETORNABLE CHAR(1) NOT NULL,
+    CONSTRAINT PK_CATEGORIA_ITEM PRIMARY KEY (ID_CATEGORIA)
+);
+/
+
+CREATE TABLE BITACORA (
+    ID_BITACORA NUMBER,
+    TABLA VARCHAR2(40) NOT NULL,
+    OPERACION VARCHAR2(10) NOT NULL,
+    ID_REGISTRO NUMBER NOT NULL,
+    VALOR_ANTERIOR VARCHAR2(500),
+    VALOR_NUEVO VARCHAR2(500),
+    USUARIO_BD VARCHAR2(50) NOT NULL,
+    FECHA DATE NOT NULL,
+    CONSTRAINT PK_BITACORA PRIMARY KEY (ID_BITACORA)
+);
+/
+
+
+CREATE TABLE USUARIO (
+    ID_USUARIO NUMBER,
+    ID_ROL NUMBER NOT NULL,
+    ID_PERSONAL NUMBER,
+    USERNAME VARCHAR2(30) NOT NULL,
+    PASSWORD_HASH VARCHAR2(255) NOT NULL,
+    ESTADO CHAR(1) NOT NULL,
+    CONSTRAINT PK_USUARIO PRIMARY KEY (ID_USUARIO),
+    CONSTRAINT FK_USUARIO_ROL FOREIGN KEY (ID_ROL)
+        REFERENCES ROL (ID_ROL),
+    CONSTRAINT FK_USUARIO_PERSONAL FOREIGN KEY (ID_PERSONAL)
+        REFERENCES PERSONAL (ID_PERSONAL)
+);
+/
+
+CREATE TABLE FAENA (
+    ID_FAENA NUMBER,
+    ID_CLIENTE NUMBER NOT NULL,
+    NOMBRE VARCHAR2(100) NOT NULL,
+    UBICACION VARCHAR2(150),
+    CONSTRAINT PK_FAENA PRIMARY KEY (ID_FAENA),
+    CONSTRAINT FK_FAENA_CLIENTE FOREIGN KEY (ID_CLIENTE)
+        REFERENCES CLIENTE (ID_CLIENTE)
+);
+/
+
+CREATE TABLE ITEM (
+    ID_ITEM NUMBER,
+    ID_CATEGORIA NUMBER NOT NULL,
+    NOMBRE VARCHAR2(120) NOT NULL,
+    DIMENSION VARCHAR2(40),
+    UNIDAD VARCHAR2(20) NOT NULL,
+    ES_IDENTIFICABLE CHAR(1) NOT NULL,
+    CONSTRAINT PK_ITEM PRIMARY KEY (ID_ITEM),
+    CONSTRAINT FK_ITEM_CATEGORIA FOREIGN KEY (ID_CATEGORIA)
+        REFERENCES CATEGORIA_ITEM (ID_CATEGORIA)
+);
+/
+
+
+
+CREATE TABLE UNIDAD_EQUIPO (
+    ID_UNIDAD NUMBER,
+    ID_ITEM NUMBER NOT NULL,
+    CODIGO VARCHAR2(30) NOT NULL,
+    NRO_SERIE VARCHAR2(50),
+    ESTADO VARCHAR2(20) NOT NULL,
+    FECHA_PROXIMA_CALIBRACION DATE,
+    CONSTRAINT PK_UNIDAD_EQUIPO PRIMARY KEY (ID_UNIDAD),
+    CONSTRAINT FK_UNIDAD_ITEM FOREIGN KEY (ID_ITEM)
+        REFERENCES ITEM (ID_ITEM)
+);
+/
+
+CREATE TABLE PLANTILLA_ITEM (
+    ID_TIPO_TRABAJO NUMBER,
+    ID_ITEM NUMBER,
+    CANTIDAD_ESTANDAR NUMBER(8, 2) NOT NULL,
+    CONSTRAINT PK_PLANTILLA_ITEM PRIMARY KEY (ID_TIPO_TRABAJO, ID_ITEM),
+    CONSTRAINT FK_PLANTILLA_TIPO_TRABAJO FOREIGN KEY (ID_TIPO_TRABAJO)
+        REFERENCES TIPO_TRABAJO (ID_TIPO_TRABAJO),
+    CONSTRAINT FK_PLANTILLA_ITEM FOREIGN KEY (ID_ITEM)
+        REFERENCES ITEM (ID_ITEM)
+);
+/
+
+CREATE TABLE ORDEN_TRABAJO (
+    ID_OT NUMBER,
+    ID_FAENA NUMBER NOT NULL,
+    ID_TIPO_TRABAJO NUMBER NOT NULL,
+    ID_VEHICULO NUMBER NOT NULL,
+    ID_SUPERVISOR NUMBER NOT NULL,
+    ID_MAESTRO NUMBER NOT NULL,
+    NRO_OT VARCHAR2(20) NOT NULL,
+    FECHA_SALIDA DATE NOT NULL,
+    FECHA_RETORNO_PREVISTA DATE,
+    FECHA_RETORNO DATE,
+    ESTADO VARCHAR2(20) NOT NULL,
+    CONSTRAINT PK_ORDEN_TRABAJO PRIMARY KEY (ID_OT),
+    CONSTRAINT FK_OT_FAENA FOREIGN KEY (ID_FAENA)
+        REFERENCES FAENA (ID_FAENA),
+    CONSTRAINT FK_OT_TIPO_TRABAJO FOREIGN KEY (ID_TIPO_TRABAJO)
+        REFERENCES TIPO_TRABAJO (ID_TIPO_TRABAJO),
+    CONSTRAINT FK_OT_VEHICULO FOREIGN KEY (ID_VEHICULO)
+        REFERENCES VEHICULO (ID_VEHICULO),
+    CONSTRAINT FK_OT_SUPERVISOR FOREIGN KEY (ID_SUPERVISOR)
+        REFERENCES PERSONAL (ID_PERSONAL),
+    CONSTRAINT FK_OT_MAESTRO FOREIGN KEY (ID_MAESTRO)
+        REFERENCES PERSONAL (ID_PERSONAL)
+);
+/
+
+
+CREATE TABLE MANTENCION (
+    ID_MANTENCION NUMBER,
+    ID_UNIDAD NUMBER NOT NULL,
+    TIPO VARCHAR2(20) NOT NULL,
+    FECHA DATE NOT NULL,
+    FECHA_PROXIMA DATE,
+    OBSERVACION VARCHAR2(250),
+    CONSTRAINT PK_MANTENCION PRIMARY KEY (ID_MANTENCION),
+    CONSTRAINT FK_MANTENCION_UNIDAD FOREIGN KEY (ID_UNIDAD)
+        REFERENCES UNIDAD_EQUIPO (ID_UNIDAD)
+);
+/
+
+CREATE TABLE CHECKLIST_DETALLE (
+    ID_DETALLE NUMBER,
+    ID_OT NUMBER NOT NULL,
+    ID_ITEM NUMBER NOT NULL,
+    ID_UNIDAD NUMBER,
+    CANTIDAD_REQUERIDA NUMBER(8, 2) NOT NULL,
+    CANTIDAD_DESPACHADA NUMBER(8, 2),
+    CANTIDAD_RETORNADA NUMBER(8, 2),
+    ESTADO_ITEM VARCHAR2(20) NOT NULL,
+    OBSERVACION VARCHAR2(250),
+    VERIFICADO CHAR(1),
+    FECHA_VERIFICACION DATE,
+    CONSTRAINT PK_CHECKLIST_DETALLE PRIMARY KEY (ID_DETALLE),
+    CONSTRAINT FK_CHECKLIST_OT FOREIGN KEY (ID_OT)
+        REFERENCES ORDEN_TRABAJO (ID_OT),
+    CONSTRAINT FK_CHECKLIST_ITEM FOREIGN KEY (ID_ITEM)
+        REFERENCES ITEM (ID_ITEM),
+    CONSTRAINT FK_CHECKLIST_UNIDAD FOREIGN KEY (ID_UNIDAD)
+        REFERENCES UNIDAD_EQUIPO (ID_UNIDAD)
+);
+/
+
+CREATE TABLE ALERTA (
+    ID_ALERTA NUMBER,
+    ID_OT NUMBER,
+    ID_UNIDAD NUMBER,
+    TIPO VARCHAR2(30) NOT NULL,
+    MENSAJE VARCHAR2(250) NOT NULL,
+    FECHA DATE NOT NULL,
+    ATENDIDA CHAR(1) NOT NULL,
+    CONSTRAINT PK_ALERTA PRIMARY KEY (ID_ALERTA),
+    CONSTRAINT FK_ALERTA_OT FOREIGN KEY (ID_OT)
+        REFERENCES ORDEN_TRABAJO (ID_OT),
+    CONSTRAINT FK_ALERTA_UNIDAD FOREIGN KEY (ID_UNIDAD)
+        REFERENCES UNIDAD_EQUIPO (ID_UNIDAD)
+);
+/
+
+CREATE TABLE REQ_COMPRA (
+    ID_REQUERIMIENTO NUMBER,
+    ID_DETALLE NUMBER NOT NULL,
+    ID_PROVEEDOR NUMBER NOT NULL,
+    CANTIDAD NUMBER(8, 2) NOT NULL,
+    ESTADO VARCHAR2(20) NOT NULL,
+    FECHA DATE NOT NULL,
+    CONSTRAINT PK_REQ_COMPRA PRIMARY KEY (ID_REQUERIMIENTO),
+    CONSTRAINT FK_REQ_DETALLE FOREIGN KEY (ID_DETALLE)
+        REFERENCES CHECKLIST_DETALLE (ID_DETALLE),
+    CONSTRAINT FK_REQ_PROVEEDOR FOREIGN KEY (ID_PROVEEDOR)
+        REFERENCES PROVEEDOR (ID_PROVEEDOR)
+);
+/
+-------------------------------------------------------------------PROCEDIMIENTOS--------------------------------------------------------------------------------------
+
+
+-----MANTENEDORES DE ROL----- 
+CREATE SEQUENCE SEQ_ROL
+START WITH 1 
+INCREMENT BY 1
+NOMAXVALUE;
+/
+
+CREATE OR REPLACE PROCEDURE INSERTAR_ROL (
+    p_nombre_rol VARCHAR2
+) 
+AS
+BEGIN
+    INSERT INTO ROL (ID_ROL, NOMBRE_ROL)
+    VALUES (SEQ_ROL.NEXTVAL, p_nombre_rol);
+    COMMIT;
+END;
+/
+
+CREATE OR REPLACE PROCEDURE ACTUALIZAR_ROL (
+    p_id_rol NUMBER,
+    p_nombre_rol VARCHAR2
+) 
+AS
+BEGIN
+    UPDATE ROL
+    SET NOMBRE_ROL = p_nombre_rol
+    WHERE ID_ROL = p_id_rol;
+    COMMIT;
+END;
+/
+
+CREATE OR REPLACE PROCEDURE ELIMINAR_ROL (
+    p_id_rol NUMBER
+) 
+AS
+BEGIN
+    DELETE FROM ROL
+    WHERE ID_ROL = p_id_rol;
+    COMMIT;
+END;
+/
+
+CREATE OR REPLACE PROCEDURE LISTAR_ROL (
+    p_cursor OUT SYS_REFCURSOR
+) 
+AS
+BEGIN
+    OPEN p_cursor FOR
+        SELECT ID_ROL, NOMBRE_ROL
+        FROM ROL
+        ORDER BY ID_ROL;
+END;
+/
+-----MANTENEDORES PERSONAL------
+
+
+CREATE SEQUENCE SEQ_PERSONAL
+START WITH 1 
+INCREMENT BY 1
+NOMAXVALUE;
+/
+
+
+CREATE OR REPLACE PROCEDURE INSERTAR_PERSONAL (
+    p_rut VARCHAR2,
+    p_nombre VARCHAR2,
+    p_cargo VARCHAR2,
+    p_estado CHAR
+) AS
+BEGIN
+    INSERT INTO PERSONAL (ID_PERSONAL, RUT, NOMBRE, CARGO, ESTADO)
+    VALUES (SEQ_PERSONAL.NEXTVAL, p_rut, p_nombre, p_cargo, p_estado);
+    COMMIT;
+END;
+/
+
+
+CREATE OR REPLACE PROCEDURE ACTUALIZAR_PERSONAL (
+    p_id_personal NUMBER,
+    p_rut VARCHAR2,
+    p_nombre VARCHAR2,
+    p_cargo VARCHAR2,
+    p_estado CHAR
+) 
+AS
+BEGIN
+    UPDATE PERSONAL
+    SET RUT = p_rut,
+        NOMBRE = p_nombre,
+        CARGO = p_cargo,
+        ESTADO = p_estado
+    WHERE ID_PERSONAL = p_id_personal;
+    COMMIT;
+END;
+/
+
+
+CREATE OR REPLACE PROCEDURE ELIMINAR_PERSONAL (
+    p_id_personal NUMBER
+) 
+AS
+BEGIN
+    DELETE FROM PERSONAL
+    WHERE ID_PERSONAL = p_id_personal;
+    COMMIT;
+END;
+/
+
+
+CREATE OR REPLACE PROCEDURE LISTAR_PERSONAL (
+    p_cursor OUT SYS_REFCURSOR
+) 
+AS
+BEGIN
+    OPEN p_cursor FOR
+        SELECT ID_PERSONAL, RUT, NOMBRE, CARGO, ESTADO
+        FROM PERSONAL
+        ORDER BY ID_PERSONAL;
+END;
+/
+
+-----MANTENEDOR CLIENTE--------
+
+
+
+CREATE SEQUENCE SEQ_CLIENTE
+START WITH 1 
+INCREMENT BY 1
+NOMAXVALUE;
+/
+
+
+CREATE OR REPLACE PROCEDURE INSERTAR_CLIENTE (
+    p_rut VARCHAR2,
+    p_razon_social VARCHAR2,
+    p_contacto VARCHAR2,
+    p_email VARCHAR2,
+    p_telefono VARCHAR2
+) 
+AS
+BEGIN
+    INSERT INTO CLIENTE (ID_CLIENTE, RUT, RAZON_SOCIAL, CONTACTO, EMAIL, TELEFONO)
+    VALUES (SEQ_CLIENTE.NEXTVAL, p_rut, p_razon_social, p_contacto, p_email, p_telefono);
+    COMMIT;
+END;
+/
+
+
+CREATE OR REPLACE PROCEDURE ACTUALIZAR_CLIENTE (
+    p_id_cliente NUMBER,
+    p_rut VARCHAR2,
+    p_razon_social VARCHAR2,
+    p_contacto VARCHAR2,
+    p_email VARCHAR2,
+    p_telefono VARCHAR2
+) 
+AS
+BEGIN
+    UPDATE CLIENTE
+    SET RUT = p_rut,
+        RAZON_SOCIAL = p_razon_social,
+        CONTACTO = p_contacto,
+        EMAIL = p_email,
+        TELEFONO = p_telefono
+    WHERE ID_CLIENTE = p_id_cliente;
+    COMMIT;
+END;
+/
+
+
+CREATE OR REPLACE PROCEDURE ELIMINAR_CLIENTE (
+    p_id_cliente NUMBER
+) 
+AS
+BEGIN
+    DELETE FROM CLIENTE
+    WHERE ID_CLIENTE = p_id_cliente;
+    COMMIT;
+END;
+/
+
+
+CREATE OR REPLACE PROCEDURE LISTAR_CLIENTE (
+    p_cursor OUT SYS_REFCURSOR
+) 
+AS
+BEGIN
+    OPEN p_cursor FOR
+        SELECT ID_CLIENTE, RUT, RAZON_SOCIAL, CONTACTO, EMAIL, TELEFONO
+        FROM CLIENTE
+        ORDER BY ID_CLIENTE;
+END;
+/
+-----------MANTENEDORES PROVEEDOR---------------
+
+
+CREATE SEQUENCE SEQ_PROVEEDOR 
+START WITH 1 
+INCREMENT BY 1
+NOMAXVALUE;
+/
+
+CREATE OR REPLACE PROCEDURE INSERTAR_PROVEEDOR (
+    p_rut VARCHAR2,
+    p_razon_social VARCHAR2,
+    p_contacto VARCHAR2,
+    p_telefono VARCHAR2
+) 
+AS
+BEGIN
+    INSERT INTO PROVEEDOR (ID_PROVEEDOR, RUT, RAZON_SOCIAL, CONTACTO, TELEFONO)
+    VALUES (SEQ_PROVEEDOR.NEXTVAL, p_rut, p_razon_social, p_contacto, p_telefono);
+    COMMIT;
+END;
+/
+
+
+CREATE OR REPLACE PROCEDURE ACTUALIZAR_PROVEEDOR (
+    p_id_proveedor NUMBER,
+    p_rut VARCHAR2,
+    p_razon_social VARCHAR2,
+    p_contacto VARCHAR2,
+    p_telefono VARCHAR2
+) 
+AS
+BEGIN
+    UPDATE PROVEEDOR
+    SET RUT = p_rut,
+        RAZON_SOCIAL = p_razon_social,
+        CONTACTO = p_contacto,
+        TELEFONO = p_telefono
+    WHERE ID_PROVEEDOR = p_id_proveedor;
+    COMMIT;
+END;
+/
+
+
+CREATE OR REPLACE PROCEDURE ELIMINAR_PROVEEDOR (
+    p_id_proveedor NUMBER
+) 
+AS
+BEGIN
+    DELETE FROM PROVEEDOR
+    WHERE ID_PROVEEDOR = p_id_proveedor;
+    COMMIT;
+END;
+/
+
+
+CREATE OR REPLACE PROCEDURE LISTAR_PROVEEDOR (
+    p_cursor OUT SYS_REFCURSOR
+) 
+AS
+BEGIN
+    OPEN p_cursor FOR
+        SELECT ID_PROVEEDOR, RUT, RAZON_SOCIAL, CONTACTO, TELEFONO
+        FROM PROVEEDOR
+        ORDER BY ID_PROVEEDOR;
+END;
+/
+
+------------MANTENEDORES VEHICULO----------
+
+
+CREATE SEQUENCE SEQ_VEHICULO
+START WITH 1 
+INCREMENT BY 1
+NOMAXVALUE;
+/
+
+CREATE OR REPLACE PROCEDURE INSERTAR_VEHICULO (
+    p_patente VARCHAR2,
+    p_tipo VARCHAR2,
+    p_estado CHAR
+) 
+AS
+BEGIN
+    INSERT INTO VEHICULO (ID_VEHICULO, PATENTE, TIPO, ESTADO)
+    VALUES (SEQ_VEHICULO.NEXTVAL, p_patente, p_tipo, p_estado);
+    COMMIT;
+END;
+/
+
+
+CREATE OR REPLACE PROCEDURE ACTUALIZAR_VEHICULO (
+    p_id_vehiculo NUMBER,
+    p_patente VARCHAR2,
+    p_tipo VARCHAR2,
+    p_estado CHAR
+) 
+AS
+BEGIN
+    UPDATE VEHICULO
+    SET PATENTE = p_patente,
+        TIPO = p_tipo,
+        ESTADO = p_estado
+    WHERE ID_VEHICULO = p_id_vehiculo;
+    COMMIT;
+END;
+/
+
+
+CREATE OR REPLACE PROCEDURE ELIMINAR_VEHICULO (
+    p_id_vehiculo NUMBER
+) 
+AS
+BEGIN
+    DELETE FROM VEHICULO
+    WHERE ID_VEHICULO = p_id_vehiculo;
+    COMMIT;
+END;
+/
+
+
+CREATE OR REPLACE PROCEDURE LISTAR_VEHICULO (
+    p_cursor OUT SYS_REFCURSOR
+) 
+AS
+BEGIN
+    OPEN p_cursor FOR
+        SELECT ID_VEHICULO, PATENTE, TIPO, ESTADO
+        FROM VEHICULO
+        ORDER BY ID_VEHICULO;
+END;
+/
+
+-----------------MANTENEDOR TIPO_TRABAJO--------------------
+
+
+CREATE SEQUENCE SEQ_TIPO_TRABAJO 
+START WITH 1 
+INCREMENT BY 1
+NOMAXVALUE;
+/
+
+
+CREATE OR REPLACE PROCEDURE INSERTAR_TIPO_TRABAJO (
+    p_nombre VARCHAR2,
+    p_descripcion VARCHAR2
+) 
+AS
+BEGIN
+    INSERT INTO TIPO_TRABAJO (ID_TIPO_TRABAJO, NOMBRE, DESCRIPCION)
+    VALUES (SEQ_TIPO_TRABAJO.NEXTVAL, p_nombre, p_descripcion);
+    COMMIT;
+END;
+/
+
+
+CREATE OR REPLACE PROCEDURE ACTUALIZAR_TIPO_TRABAJO (
+    p_id_tipo_trabajo NUMBER,
+    p_nombre VARCHAR2,
+    p_descripcion VARCHAR2
+) 
+AS
+BEGIN
+    UPDATE TIPO_TRABAJO
+    SET NOMBRE = p_nombre,
+        DESCRIPCION = p_descripcion
+    WHERE ID_TIPO_TRABAJO = p_id_tipo_trabajo;
+    COMMIT;
+END;
+/
+
+
+CREATE OR REPLACE PROCEDURE ELIMINAR_TIPO_TRABAJO (
+    p_id_tipo_trabajo NUMBER
+) 
+AS
+BEGIN
+    DELETE FROM TIPO_TRABAJO
+    WHERE ID_TIPO_TRABAJO = p_id_tipo_trabajo;
+    COMMIT;
+END;
+/
+
+
+CREATE OR REPLACE PROCEDURE LISTAR_TIPO_TRABAJO (
+    p_cursor OUT SYS_REFCURSOR
+) 
+AS
+BEGIN
+    OPEN p_cursor FOR
+        SELECT ID_TIPO_TRABAJO, NOMBRE, DESCRIPCION
+        FROM TIPO_TRABAJO
+        ORDER BY ID_TIPO_TRABAJO;
+END;
+/
+
+----------------MANTENEDOR CATEGORIA_ITEM--------------------
+
+
+CREATE SEQUENCE SEQ_CATEGORIA_ITEM 
+START WITH 1 
+INCREMENT BY 1
+NOMAXVALUE;
+/
+
+
+CREATE OR REPLACE PROCEDURE INSERTAR_CATEGORIA_ITEM (
+    p_nombre VARCHAR2,
+    p_es_retornable CHAR
+) 
+AS
+BEGIN
+    INSERT INTO CATEGORIA_ITEM (ID_CATEGORIA, NOMBRE, ES_RETORNABLE)
+    VALUES (SEQ_CATEGORIA_ITEM.NEXTVAL, p_nombre, p_es_retornable);
+    COMMIT;
+END;
+/
+
+
+CREATE OR REPLACE PROCEDURE ACTUALIZAR_CATEGORIA_ITEM (
+    p_id_categoria NUMBER,
+    p_nombre VARCHAR2,
+    p_es_retornable CHAR
+) 
+AS
+BEGIN
+    UPDATE CATEGORIA_ITEM
+    SET NOMBRE = p_nombre,
+        ES_RETORNABLE = p_es_retornable
+    WHERE ID_CATEGORIA = p_id_categoria;
+    COMMIT;
+END;
+/
+
+
+CREATE OR REPLACE PROCEDURE ELIMINAR_CATEGORIA_ITEM (
+    p_id_categoria NUMBER
+) 
+AS
+BEGIN
+    DELETE FROM CATEGORIA_ITEM
+    WHERE ID_CATEGORIA = p_id_categoria;
+    COMMIT;
+END;
+/
+
+
+CREATE OR REPLACE PROCEDURE LISTAR_CATEGORIA_ITEM (
+    p_cursor OUT SYS_REFCURSOR
+) 
+AS
+BEGIN
+    OPEN p_cursor FOR
+        SELECT ID_CATEGORIA, NOMBRE, ES_RETORNABLE
+        FROM CATEGORIA_ITEM
+        ORDER BY ID_CATEGORIA;
+END;
+/
+
+--------------MANTENEDOR FAENA------------------
+
+
+CREATE SEQUENCE SEQ_FAENA 
+START WITH 1 
+INCREMENT BY 1
+NOMAXVALUE;
+/
+
+
+CREATE OR REPLACE PROCEDURE INSERTAR_FAENA (
+    p_id_cliente NUMBER,
+    p_nombre VARCHAR2,
+    p_ubicacion VARCHAR2
+) 
+AS
+BEGIN
+    INSERT INTO FAENA (ID_FAENA, ID_CLIENTE, NOMBRE, UBICACION)
+    VALUES (SEQ_FAENA.NEXTVAL, p_id_cliente, p_nombre, p_ubicacion);
+    COMMIT;
+END;
+/
+
+
+CREATE OR REPLACE PROCEDURE ACTUALIZAR_FAENA (
+    p_id_faena NUMBER,
+    p_id_cliente NUMBER,
+    p_nombre VARCHAR2,
+    p_ubicacion VARCHAR2
+) 
+AS
+BEGIN
+    UPDATE FAENA
+    SET ID_CLIENTE = p_id_cliente,
+        NOMBRE = p_nombre,
+        UBICACION = p_ubicacion
+    WHERE ID_FAENA = p_id_faena;
+    COMMIT;
+END;
+/
+
+
+CREATE OR REPLACE PROCEDURE ELIMINAR_FAENA (
+    p_id_faena NUMBER
+) 
+AS
+BEGIN
+    DELETE FROM FAENA
+    WHERE ID_FAENA = p_id_faena;
+    COMMIT;
+END;
+/
+
+
+CREATE OR REPLACE PROCEDURE LISTAR_FAENA (
+    p_cursor OUT SYS_REFCURSOR
+) 
+AS
+BEGIN
+    OPEN p_cursor FOR
+        SELECT f.ID_FAENA,
+               f.ID_CLIENTE,
+               c.RAZON_SOCIAL AS CLIENTE,
+               f.NOMBRE,
+               f.UBICACION
+        FROM FAENA f
+        JOIN CLIENTE c ON f.ID_CLIENTE = c.ID_CLIENTE
+        ORDER BY f.ID_FAENA;
+END;
+/
+
+
+----------------MANTENEDOR ITEM--------------------------
+
+
+CREATE SEQUENCE SEQ_ITEM 
+START WITH 1 
+INCREMENT BY 1
+NOMAXVALUE;
+/
+
+
+CREATE OR REPLACE PROCEDURE INSERTAR_ITEM (
+    p_id_categoria NUMBER,
+    p_nombre VARCHAR2,
+    p_dimension VARCHAR2,
+    p_unidad VARCHAR2,
+    p_es_identificable CHAR
+) 
+AS
+BEGIN
+    INSERT INTO ITEM (ID_ITEM, ID_CATEGORIA, NOMBRE, DIMENSION, UNIDAD, ES_IDENTIFICABLE)
+    VALUES (SEQ_ITEM.NEXTVAL, p_id_categoria, p_nombre, p_dimension, p_unidad, p_es_identificable);
+    COMMIT;
+END;
+/
+
+
+CREATE OR REPLACE PROCEDURE ACTUALIZAR_ITEM (
+    p_id_item NUMBER,
+    p_id_categoria NUMBER,
+    p_nombre VARCHAR2,
+    p_dimension VARCHAR2,
+    p_unidad VARCHAR2,
+    p_es_identificable CHAR
+) 
+AS
+BEGIN
+    UPDATE ITEM
+    SET ID_CATEGORIA = p_id_categoria,
+        NOMBRE = p_nombre,
+        DIMENSION = p_dimension,
+        UNIDAD = p_unidad,
+        ES_IDENTIFICABLE = p_es_identificable
+    WHERE ID_ITEM = p_id_item;
+    COMMIT;
+END;
+/
+
+
+CREATE OR REPLACE PROCEDURE ELIMINAR_ITEM (
+    p_id_item NUMBER
+) 
+AS
+BEGIN
+    DELETE FROM ITEM
+    WHERE ID_ITEM = p_id_item;
+    COMMIT;
+END;
+/
+
+
+CREATE OR REPLACE PROCEDURE LISTAR_ITEM (
+    p_cursor OUT SYS_REFCURSOR
+) 
+AS
+BEGIN
+    OPEN p_cursor FOR
+        SELECT i.ID_ITEM,
+               i.ID_CATEGORIA,
+               c.NOMBRE AS CATEGORIA,
+               i.NOMBRE,
+               i.DIMENSION,
+               i.UNIDAD,
+               i.ES_IDENTIFICABLE
+        FROM ITEM i
+        JOIN CATEGORIA_ITEM c ON i.ID_CATEGORIA = c.ID_CATEGORIA
+        ORDER BY i.ID_ITEM;
+END;
+/
+
+
+
+--------------------------MANTENEDOR UNIDAD_EQUIPO------------------------------
+
+
+CREATE SEQUENCE SEQ_UNIDAD_EQUIPO 
+START WITH 1 
+INCREMENT BY 1
+NOMAXVALUE;
+/
+
+CREATE OR REPLACE PROCEDURE INSERTAR_UNIDAD_EQUIPO (
+    p_id_item NUMBER,
+    p_codigo VARCHAR2,
+    p_nro_serie VARCHAR2,
+    p_estado VARCHAR2,
+    p_fecha_proxima_calibracion DATE
+) 
+AS
+BEGIN
+    INSERT INTO UNIDAD_EQUIPO (ID_UNIDAD, ID_ITEM, CODIGO, NRO_SERIE, ESTADO, FECHA_PROXIMA_CALIBRACION)
+    VALUES (SEQ_UNIDAD_EQUIPO.NEXTVAL, p_id_item, p_codigo, p_nro_serie, p_estado, p_fecha_proxima_calibracion);
+    COMMIT;
+END;
+/
+
+
+CREATE OR REPLACE PROCEDURE ACTUALIZAR_UNIDAD_EQUIPO (
+    p_id_unidad NUMBER,
+    p_id_item NUMBER,
+    p_codigo VARCHAR2,
+    p_nro_serie VARCHAR2,
+    p_estado VARCHAR2,
+    p_fecha_proxima_calibracion DATE
+) 
+AS
+BEGIN
+    UPDATE UNIDAD_EQUIPO
+    SET ID_ITEM = p_id_item,
+        CODIGO = p_codigo,
+        NRO_SERIE = p_nro_serie,
+        ESTADO = p_estado,
+        FECHA_PROXIMA_CALIBRACION = p_fecha_proxima_calibracion
+    WHERE ID_UNIDAD = p_id_unidad;
+    COMMIT;
+END;
+/
+
+
+CREATE OR REPLACE PROCEDURE ELIMINAR_UNIDAD_EQUIPO (
+    p_id_unidad NUMBER
+) 
+AS
+BEGIN
+    DELETE FROM UNIDAD_EQUIPO
+    WHERE ID_UNIDAD = p_id_unidad;
+    COMMIT;
+END;
+/
+
+
+CREATE OR REPLACE PROCEDURE LISTAR_UNIDAD_EQUIPO (
+    p_cursor OUT SYS_REFCURSOR
+) 
+AS
+BEGIN
+    OPEN p_cursor FOR
+        SELECT u.ID_UNIDAD,
+               u.ID_ITEM,
+               i.NOMBRE AS ITEM,
+               u.CODIGO,
+               u.NRO_SERIE,
+               u.ESTADO,
+               u.FECHA_PROXIMA_CALIBRACION
+        FROM UNIDAD_EQUIPO u
+        JOIN ITEM i ON u.ID_ITEM = i.ID_ITEM
+        ORDER BY u.ID_UNIDAD;
+END;
+/
+
+------------------------------MANTENEDOR USUARIO------------------------------------
+
+
+CREATE SEQUENCE SEQ_USUARIO 
+START WITH 1 
+INCREMENT BY 1
+NOMAXVALUE;
+/
+
+CREATE OR REPLACE PROCEDURE INSERTAR_USUARIO (
+    p_id_rol NUMBER,
+    p_id_personal NUMBER,
+    p_username VARCHAR2,
+    p_password_hash VARCHAR2,
+    p_estado CHAR
+) 
+AS
+BEGIN
+    INSERT INTO USUARIO (ID_USUARIO, ID_ROL, ID_PERSONAL, USERNAME, PASSWORD_HASH, ESTADO)
+    VALUES (SEQ_USUARIO.NEXTVAL, p_id_rol, p_id_personal, p_username, p_password_hash, p_estado);
+    COMMIT;
+END;
+/
+
+
+CREATE OR REPLACE PROCEDURE ACTUALIZAR_USUARIO (
+    p_id_usuario NUMBER,
+    p_id_rol NUMBER,
+    p_id_personal NUMBER,
+    p_username VARCHAR2,
+    p_password_hash VARCHAR2,
+    p_estado CHAR
+) 
+AS
+BEGIN
+    UPDATE USUARIO
+    SET ID_ROL = p_id_rol,
+        ID_PERSONAL = p_id_personal,
+        USERNAME = p_username,
+        PASSWORD_HASH = p_password_hash,
+        ESTADO = p_estado
+    WHERE ID_USUARIO = p_id_usuario;
+    COMMIT;
+END;
+/
+
+
+
+CREATE OR REPLACE PROCEDURE ELIMINAR_USUARIO (
+    p_id_usuario NUMBER
+) 
+AS
+BEGIN
+    DELETE FROM USUARIO
+    WHERE ID_USUARIO = p_id_usuario;
+    COMMIT;
+END;
+/
+
+
+CREATE OR REPLACE PROCEDURE LISTAR_USUARIO (
+    p_cursor OUT SYS_REFCURSOR
+) 
+AS
+BEGIN
+    OPEN p_cursor FOR
+        SELECT u.ID_USUARIO,
+               u.ID_ROL,
+               r.NOMBRE_ROL AS ROL,
+               u.ID_PERSONAL,
+               p.NOMBRE AS PERSONAL,
+               u.USERNAME,
+               u.ESTADO
+        FROM USUARIO u
+        JOIN ROL r ON u.ID_ROL = r.ID_ROL
+        LEFT JOIN PERSONAL p ON u.ID_PERSONAL = p.ID_PERSONAL
+        ORDER BY u.ID_USUARIO;
+END;
+/
+
+----------------------RESTO DE SECUANCIAS PARA PK'S-----------------------------------
+
+CREATE SEQUENCE SEQ_ORDEN_TRABAJO 
+START WITH 1 
+INCREMENT BY 1
+NOMAXVALUE;
+/
+
+CREATE SEQUENCE SEQ_CHECKLIST_DETALLE 
+START WITH 1 
+INCREMENT BY 1
+NOMAXVALUE;
+/
+
+CREATE SEQUENCE SEQ_MANTENCION 
+START WITH 1 
+INCREMENT BY 1
+NOMAXVALUE;
+/
+CREATE SEQUENCE SEQ_REQ_COMPRA 
+START WITH 1 
+INCREMENT BY 1
+NOMAXVALUE;
+/
+CREATE SEQUENCE SEQ_ALERTA 
+START WITH 1 
+INCREMENT BY 1
+NOMAXVALUE;
+/
+CREATE SEQUENCE SEQ_BITACORA 
+START WITH 1 
+INCREMENT BY 1
+NOMAXVALUE;
+/
+
+--------------PROCEDIMIENTO CONTROL DE ACCESO-------------------
+
+CREATE OR REPLACE PROCEDURE SP_LOGIN (
+    p_username VARCHAR2,
+    p_password_hash VARCHAR2,
+    p_cursor OUT SYS_REFCURSOR
+) AS
+BEGIN
+    OPEN p_cursor FOR
+        SELECT u.ID_USUARIO,
+               u.USERNAME,
+               r.ID_ROL,
+               r.NOMBRE_ROL AS ROL,
+               p.ID_PERSONAL,
+               p.NOMBRE AS NOMBRE_PERSONA
+        FROM USUARIO u
+        JOIN ROL r ON u.ID_ROL = r.ID_ROL
+        LEFT JOIN PERSONAL p ON u.ID_PERSONAL = p.ID_PERSONAL
+        WHERE u.USERNAME = p_username
+          AND u.PASSWORD_HASH = p_password_hash
+          AND u.ESTADO = 'A';
+END;
+/
+
+----------------------------FUNCIONES DE CALCULO DINAMICO---------------------
+
+CREATE OR REPLACE FUNCTION FN_POR_DESPACHAR (
+    p_id_detalle NUMBER
+) RETURN NUMBER AS
+    v_pendiente NUMBER;
+BEGIN
+    SELECT NVL(CANTIDAD_REQUERIDA, 0) - NVL(CANTIDAD_DESPACHADA, 0)
+    INTO v_pendiente
+    FROM CHECKLIST_DETALLE
+    WHERE ID_DETALLE = p_id_detalle;
+
+    RETURN v_pendiente;
+END;
+/
+
+CREATE OR REPLACE FUNCTION FN_NO_RETORNADO (
+    p_id_detalle NUMBER
+) RETURN NUMBER AS
+    v_no_retornado NUMBER;
+    v_es_retornable CHAR(1);
+BEGIN
+    SELECT c.ES_RETORNABLE,
+           NVL(d.CANTIDAD_DESPACHADA, 0) - NVL(d.CANTIDAD_RETORNADA, 0)
+    INTO v_es_retornable, v_no_retornado
+    FROM CHECKLIST_DETALLE d
+    JOIN ITEM i ON d.ID_ITEM = i.ID_ITEM
+    JOIN CATEGORIA_ITEM c ON i.ID_CATEGORIA = c.ID_CATEGORIA
+    WHERE d.ID_DETALLE = p_id_detalle;
+
+    IF v_es_retornable = 'S' THEN
+        RETURN v_no_retornado;
+    ELSE
+        RETURN 0;
+    END IF;
+END;
+/
+
+----------------------------------------------ORDEN TRABAJO Y CHEKLIST---------------------------------------------
+
+CREATE OR REPLACE PROCEDURE CREAR_OT_CON_CHECKLIST (
+    p_id_faena NUMBER,
+    p_id_tipo_trabajo NUMBER,
+    p_id_vehiculo NUMBER,
+    p_id_supervisor NUMBER,
+    p_id_maestro NUMBER,
+    p_nro_ot VARCHAR2,
+    p_fecha_retorno_prevista DATE
+) AS
+    v_id_ot NUMBER;
+    v_id_item NUMBER;
+    v_cant_estandar NUMBER(8, 2);
+
+    CURSOR c_plantilla IS
+        SELECT ID_ITEM, CANTIDAD_ESTANDAR
+        FROM PLANTILLA_ITEM
+        WHERE ID_TIPO_TRABAJO = p_id_tipo_trabajo;
+BEGIN
+    v_id_ot := SEQ_ORDEN_TRABAJO.NEXTVAL;
+    INSERT INTO ORDEN_TRABAJO (
+        ID_OT, ID_FAENA, ID_TIPO_TRABAJO, ID_VEHICULO,
+        ID_SUPERVISOR, ID_MAESTRO, NRO_OT,
+        FECHA_SALIDA, FECHA_RETORNO_PREVISTA, ESTADO
+    ) VALUES (
+        v_id_ot, p_id_faena, p_id_tipo_trabajo, p_id_vehiculo,
+        p_id_supervisor, p_id_maestro, p_nro_ot,
+        SYSDATE, p_fecha_retorno_prevista, 'Borrador'
+    );
+    OPEN c_plantilla;
+    LOOP
+        FETCH c_plantilla INTO v_id_item, v_cant_estandar;
+        EXIT WHEN c_plantilla%NOTFOUND;
+
+        INSERT INTO CHECKLIST_DETALLE (
+            ID_DETALLE, ID_OT, ID_ITEM, ID_UNIDAD,
+            CANTIDAD_REQUERIDA, CANTIDAD_DESPACHADA, CANTIDAD_RETORNADA,
+            ESTADO_ITEM, VERIFICADO
+        ) VALUES (
+            SEQ_CHECKLIST_DETALLE.NEXTVAL, v_id_ot, v_id_item, NULL,
+            v_cant_estandar, 0, 0,
+            'Pendiente', 'N'
+        );
+    END LOOP;
+    CLOSE c_plantilla;
+
+    COMMIT;
+END;
+/
+-----------------------------------VERIFICACION Y SALIDA DE BODEGA----------------------------------
+
+CREATE OR REPLACE PROCEDURE VERIFICAR_DESPACHAR_ITEM (
+    p_id_detalle NUMBER,
+    p_id_unidad NUMBER,
+    p_cantidad_despachada NUMBER,
+    p_observacion VARCHAR2
+) AS
+    v_cant_requerida NUMBER(8, 2);
+    v_estado_item VARCHAR2(20);
+BEGIN
+    SELECT CANTIDAD_REQUERIDA
+    INTO v_cant_requerida
+    FROM CHECKLIST_DETALLE
+    WHERE ID_DETALLE = p_id_detalle;
+    IF p_cantidad_despachada >= v_cant_requerida THEN
+        v_estado_item := 'Despachado';
+    ELSE
+        v_estado_item := 'Faltante';
+    END IF;
+
+    UPDATE CHECKLIST_DETALLE
+    SET ID_UNIDAD = p_id_unidad,
+        CANTIDAD_DESPACHADA = p_cantidad_despachada,
+        ESTADO_ITEM = v_estado_item,
+        OBSERVACION = p_observacion,
+        VERIFICADO = 'S',
+        FECHA_VERIFICACION = SYSDATE
+    WHERE ID_DETALLE = p_id_detalle;
+
+    COMMIT;
+END;
+/
+
+CREATE OR REPLACE PROCEDURE CONFIRMAR_SALIDA_OT (
+    p_id_ot NUMBER
+) AS
+BEGIN
+    UPDATE ORDEN_TRABAJO
+    SET ESTADO = 'En terreno',
+        FECHA_SALIDA = SYSDATE
+    WHERE ID_OT = p_id_ot;
+
+    COMMIT;
+END;
+/
+
+---------------------RETORNO-----------------------------
+
+
+CREATE OR REPLACE PROCEDURE REGISTRAR_RETORNO_ITEM (
+    p_id_detalle NUMBER,
+    p_cantidad_retornada NUMBER,
+    p_observacion VARCHAR2
+) AS
+    v_despachada NUMBER(8, 2);
+    v_es_retornable CHAR(1);
+    v_estado VARCHAR2(20);
+BEGIN
+    SELECT d.CANTIDAD_DESPACHADA, c.ES_RETORNABLE
+    INTO v_despachada, v_es_retornable
+    FROM CHECKLIST_DETALLE d
+    JOIN ITEM i ON d.ID_ITEM = i.ID_ITEM
+    JOIN CATEGORIA_ITEM c ON i.ID_CATEGORIA = c.ID_CATEGORIA
+    WHERE d.ID_DETALLE = p_id_detalle;
+
+    IF v_es_retornable = 'N' THEN
+        v_estado := 'Consumido';
+    ELSIF p_cantidad_retornada >= v_despachada THEN
+        v_estado := 'Retornado';
+    ELSE
+        v_estado := 'Faltante';
+    END IF;
+
+    UPDATE CHECKLIST_DETALLE
+    SET CANTIDAD_RETORNADA = p_cantidad_retornada,
+        ESTADO_ITEM = v_estado,
+        OBSERVACION = p_observacion
+    WHERE ID_DETALLE = p_id_detalle;
+
+    COMMIT;
+END;
+/
+
+
+CREATE OR REPLACE PROCEDURE CERRAR_ORDEN_TRABAJO (
+    p_id_ot NUMBER
+) AS
+    v_id_detalle NUMBER;
+
+    CURSOR c_consumibles IS
+        SELECT d.ID_DETALLE
+        FROM CHECKLIST_DETALLE d
+        JOIN ITEM i ON d.ID_ITEM = i.ID_ITEM
+        JOIN CATEGORIA_ITEM c ON i.ID_CATEGORIA = c.ID_CATEGORIA
+        WHERE d.ID_OT = p_id_ot
+          AND c.ES_RETORNABLE = 'N';
+BEGIN
+    OPEN c_consumibles;
+    LOOP
+        FETCH c_consumibles INTO v_id_detalle;
+        EXIT WHEN c_consumibles%NOTFOUND;
+
+        UPDATE CHECKLIST_DETALLE
+        SET ESTADO_ITEM = 'Consumido'
+        WHERE ID_DETALLE = v_id_detalle;
+    END LOOP;
+    CLOSE c_consumibles;
+
+    UPDATE ORDEN_TRABAJO
+    SET ESTADO = 'Cerrada',
+        FECHA_RETORNO = SYSDATE
+    WHERE ID_OT = p_id_ot;
+
+    COMMIT;
+END;
+/
+------------------------------------MANTENCION Y CALIBRACION----------------------------------------------
+
+CREATE OR REPLACE PROCEDURE REGISTRAR_MANTENCION (
+    p_id_unidad NUMBER,
+    p_tipo VARCHAR2,
+    p_fecha_proxima DATE,
+    p_observacion VARCHAR2,
+    p_estado_equipo VARCHAR2
+) AS
+BEGIN
+    INSERT INTO MANTENCION (
+        ID_MANTENCION, ID_UNIDAD, TIPO, FECHA, FECHA_PROXIMA, OBSERVACION
+    ) VALUES (
+        SEQ_MANTENCION.NEXTVAL, p_id_unidad, p_tipo, SYSDATE, p_fecha_proxima, p_observacion
+    );
+
+    UPDATE UNIDAD_EQUIPO
+    SET ESTADO = p_estado_equipo,
+        FECHA_PROXIMA_CALIBRACION = NVL(p_fecha_proxima, FECHA_PROXIMA_CALIBRACION)
+    WHERE ID_UNIDAD = p_id_unidad;
+
+    IF p_estado_equipo = 'En bodega' THEN
+        UPDATE ALERTA
+        SET ATENDIDA = 'S'
+        WHERE ID_UNIDAD = p_id_unidad
+          AND ATENDIDA = 'N';
+    END IF;
+
+    COMMIT;
+END;
+/
+
+---------------------------------------------COMPRA------------------------------------------------------
+
+
+CREATE OR REPLACE PROCEDURE GENERAR_REQ_COMPRA (
+    p_id_detalle NUMBER,
+    p_id_proveedor NUMBER
+) AS
+    v_faltante NUMBER(8, 2);
+BEGIN
+    v_faltante := FN_POR_DESPACHAR(p_id_detalle) + FN_NO_RETORNADO(p_id_detalle);
+
+    IF v_faltante > 0 THEN
+        INSERT INTO REQ_COMPRA (
+            ID_REQUERIMIENTO, ID_DETALLE, ID_PROVEEDOR, CANTIDAD, ESTADO, FECHA
+        ) VALUES (
+            SEQ_REQ_COMPRA.NEXTVAL, p_id_detalle, p_id_proveedor, v_faltante, 'Solicitado', SYSDATE
+        );
+        COMMIT;
+    END IF;
+END;
+/
+
+
+CREATE OR REPLACE PROCEDURE ACTUALIZAR_ESTADO_COMPRA (
+    p_id_requerimiento NUMBER,
+    p_estado VARCHAR2
+) AS
+BEGIN
+    UPDATE REQ_COMPRA
+    SET ESTADO = p_estado
+    WHERE ID_REQUERIMIENTO = p_id_requerimiento;
+
+    COMMIT;
+END;
+/
+-----------------------------REPORTES--------------------------
+
+CREATE OR REPLACE PROCEDURE REPORTE_FUERA_BODEGA (
+    p_cursor OUT SYS_REFCURSOR
+) AS
+BEGIN
+    OPEN p_cursor FOR
+        SELECT cl.RAZON_SOCIAL AS CLIENTE,
+               f.NOMBRE AS FAENA,
+               ot.NRO_OT,
+               ot.ESTADO AS ESTADO_OT,
+               ot.FECHA_SALIDA,
+               ot.FECHA_RETORNO_PREVISTA,
+               i.NOMBRE AS ITEM,
+               u.CODIGO AS CODIGO_EQUIPO,
+               u.NRO_SERIE,
+               d.CANTIDAD_DESPACHADA,
+               FN_NO_RETORNADO(d.ID_DETALLE) AS CANTIDAD_FUERA
+        FROM ORDEN_TRABAJO ot
+        JOIN FAENA f ON ot.ID_FAENA = f.ID_FAENA
+        JOIN CLIENTE cl ON f.ID_CLIENTE = cl.ID_CLIENTE
+        JOIN CHECKLIST_DETALLE d ON ot.ID_OT = d.ID_OT
+        JOIN ITEM i ON d.ID_ITEM = i.ID_ITEM
+        LEFT JOIN UNIDAD_EQUIPO u ON d.ID_UNIDAD = u.ID_UNIDAD
+        WHERE FN_NO_RETORNADO(d.ID_DETALLE) > 0
+        ORDER BY ot.FECHA_SALIDA, ot.NRO_OT;
+END;
+/
+
+CREATE OR REPLACE PROCEDURE REPORTE_PENDIENTES_FALTANTES (
+    p_cursor OUT SYS_REFCURSOR
+) AS
+BEGIN
+    OPEN p_cursor FOR
+        SELECT ot.NRO_OT,
+               i.NOMBRE AS ITEM,
+               i.UNIDAD,
+               FN_POR_DESPACHAR(d.ID_DETALLE) AS POR_DESPACHAR,
+               FN_NO_RETORNADO(d.ID_DETALLE) AS NO_RETORNADO,
+               rc.CANTIDAD AS CANTIDAD_COMPRA,
+               rc.ESTADO AS ESTADO_COMPRA,
+               p.RAZON_SOCIAL AS PROVEEDOR
+        FROM CHECKLIST_DETALLE d
+        JOIN ORDEN_TRABAJO ot ON d.ID_OT = ot.ID_OT
+        JOIN ITEM i ON d.ID_ITEM = i.ID_ITEM
+        LEFT JOIN REQ_COMPRA rc ON d.ID_DETALLE = rc.ID_DETALLE
+        LEFT JOIN PROVEEDOR p ON rc.ID_PROVEEDOR = p.ID_PROVEEDOR
+        WHERE FN_POR_DESPACHAR(d.ID_DETALLE) > 0
+           OR FN_NO_RETORNADO(d.ID_DETALLE) > 0
+           OR rc.ESTADO IN ('Solicitado', 'Comprado')
+        ORDER BY ot.NRO_OT, i.NOMBRE;
+END;
+/
+
+CREATE OR REPLACE PROCEDURE REPORTE_CONSUMO_MENSUAL (
+    p_cursor OUT SYS_REFCURSOR
+) AS
+BEGIN
+    OPEN p_cursor FOR
+        SELECT TO_CHAR(ot.FECHA_SALIDA, 'YYYY-MM') AS MES,
+               cl.RAZON_SOCIAL AS CLIENTE,
+               ot.NRO_OT,
+               c.NOMBRE AS CATEGORIA,
+               i.NOMBRE AS ITEM,
+               i.UNIDAD,
+               SUM(NVL(d.CANTIDAD_DESPACHADA, 0)) AS TOTAL_CONSUMIDO
+        FROM CHECKLIST_DETALLE d
+        JOIN ITEM i ON d.ID_ITEM = i.ID_ITEM
+        JOIN CATEGORIA_ITEM c ON i.ID_CATEGORIA = c.ID_CATEGORIA
+        JOIN ORDEN_TRABAJO ot ON d.ID_OT = ot.ID_OT
+        JOIN FAENA f ON ot.ID_FAENA = f.ID_FAENA
+        JOIN CLIENTE cl ON f.ID_CLIENTE = cl.ID_CLIENTE
+        WHERE c.ES_RETORNABLE = 'N'
+          AND d.ESTADO_ITEM = 'Consumido'
+        GROUP BY TO_CHAR(ot.FECHA_SALIDA, 'YYYY-MM'),
+                 cl.RAZON_SOCIAL,
+                 ot.NRO_OT,
+                 c.NOMBRE,
+                 i.NOMBRE,
+                 i.UNIDAD
+        ORDER BY MES DESC, cl.RAZON_SOCIAL, ot.NRO_OT;
+END;
+/
+
+
+-------------TRIGGERS-----------------------
+
+CREATE OR REPLACE TRIGGER VALIDAR_EQUIPO_BODEGA
+BEFORE INSERT OR UPDATE OF ID_UNIDAD, ESTADO_ITEM ON CHECKLIST_DETALLE
+FOR EACH ROW
+DECLARE
+    v_estado_equipo VARCHAR2(20);
+BEGIN
+    IF :NEW.ID_UNIDAD IS NOT NULL AND :NEW.ESTADO_ITEM IN ('Despachado', 'Faltante') THEN
+        IF INSERTING OR :OLD.ID_UNIDAD IS NULL OR :OLD.ID_UNIDAD != :NEW.ID_UNIDAD OR :OLD.ESTADO_ITEM = 'Pendiente' THEN
+            SELECT ESTADO
+            INTO v_estado_equipo
+            FROM UNIDAD_EQUIPO
+            WHERE ID_UNIDAD = :NEW.ID_UNIDAD;
+
+            IF v_estado_equipo != 'En bodega' THEN
+                RAISE_APPLICATION_ERROR(-20001, 'El equipo seleccionado no está disponible en bodega.');
+            END IF;
+        END IF;
+    END IF;
+END;
+/
+
+
+CREATE OR REPLACE TRIGGER ESTADO_UNIDAD_EQUIPO
+AFTER INSERT OR UPDATE OF ESTADO_ITEM, ID_UNIDAD ON CHECKLIST_DETALLE
+FOR EACH ROW
+BEGIN
+    IF :NEW.ID_UNIDAD IS NOT NULL THEN
+        IF :NEW.ESTADO_ITEM IN ('Despachado', 'Faltante') AND (INSERTING OR :OLD.ESTADO_ITEM = 'Pendiente') THEN
+            UPDATE UNIDAD_EQUIPO
+            SET ESTADO = 'En terreno'
+            WHERE ID_UNIDAD = :NEW.ID_UNIDAD;
+
+        ELSIF :NEW.ESTADO_ITEM = 'Retornado' THEN
+            UPDATE UNIDAD_EQUIPO
+            SET ESTADO = 'En bodega'
+            WHERE ID_UNIDAD = :NEW.ID_UNIDAD;
+        END IF;
+    END IF;
+END;
+/
+
+
+CREATE OR REPLACE TRIGGER _ALERTA_RETORNO_INCOMPLETO
+AFTER UPDATE OF CANTIDAD_RETORNADA, ESTADO_ITEM ON CHECKLIST_DETALLE
+FOR EACH ROW
+BEGIN
+    IF :NEW.ESTADO_ITEM = 'Faltante' AND :NEW.CANTIDAD_RETORNADA IS NOT NULL THEN
+        INSERT INTO ALERTA (ID_ALERTA, ID_OT, ID_UNIDAD, TIPO, MENSAJE, FECHA, ATENDIDA)
+        VALUES (
+            SEQ_ALERTA.NEXTVAL,
+            :NEW.ID_OT,
+            :NEW.ID_UNIDAD,
+            'Faltante',
+            'Retorno incompleto en el detalle ID ' || :NEW.ID_DETALLE,
+            SYSDATE,
+            'N'
+        );
+    END IF;
+END;
+/
+
+
+CREATE OR REPLACE TRIGGER _ALERTA_CALIBRACION
+AFTER INSERT OR UPDATE OF FECHA_PROXIMA_CALIBRACION ON UNIDAD_EQUIPO
+FOR EACH ROW
+BEGIN
+    IF :NEW.FECHA_PROXIMA_CALIBRACION IS NOT NULL AND :NEW.FECHA_PROXIMA_CALIBRACION < SYSDATE THEN
+        INSERT INTO ALERTA (ID_ALERTA, ID_OT, ID_UNIDAD, TIPO, MENSAJE, FECHA, ATENDIDA)
+        VALUES (
+            SEQ_ALERTA.NEXTVAL,
+            NULL,
+            :NEW.ID_UNIDAD,
+            'Calibración vencida',
+            'El equipo ' || :NEW.CODIGO || ' tiene su fecha de calibración vencida.',
+            SYSDATE,
+            'N'
+        );
+    END IF;
+END;
+/
+
+CREATE OR REPLACE TRIGGER TRG_VALIDAR_CIERRE_OT
+BEFORE UPDATE OF ESTADO ON ORDEN_TRABAJO
+FOR EACH ROW
+DECLARE
+    v_sin_conciliar NUMBER;
+BEGIN
+    IF :NEW.ESTADO = 'Cerrada' AND :OLD.ESTADO != 'Cerrada' THEN
+        SELECT COUNT(*)
+        INTO v_sin_conciliar
+        FROM CHECKLIST_DETALLE
+        WHERE ID_OT = :NEW.ID_OT
+          AND ESTADO_ITEM IN ('Pendiente', 'Despachado');
+
+        IF v_sin_conciliar > 0 THEN
+            RAISE_APPLICATION_ERROR(-20002, 'No se puede cerrar la orden: aún existen ítems sin conciliar.');
+        END IF;
+    END IF;
+END;
+/
+
+
+CREATE OR REPLACE TRIGGER TRG_BITACORA_OT
+AFTER INSERT OR UPDATE OR DELETE ON ORDEN_TRABAJO
+FOR EACH ROW
+BEGIN
+    IF INSERTING THEN
+        INSERT INTO BITACORA (ID_BITACORA, TABLA, OPERACION, ID_REGISTRO, VALOR_ANTERIOR, VALOR_NUEVO, USUARIO_BD, FECHA)
+        VALUES (SEQ_BITACORA.NEXTVAL, 'ORDEN_TRABAJO', 'INSERT', :NEW.ID_OT, NULL, :NEW.NRO_OT || ' - ' || :NEW.ESTADO, USER, SYSDATE);
+
+    ELSIF UPDATING THEN
+        INSERT INTO BITACORA (ID_BITACORA, TABLA, OPERACION, ID_REGISTRO, VALOR_ANTERIOR, VALOR_NUEVO, USUARIO_BD, FECHA)
+        VALUES (SEQ_BITACORA.NEXTVAL, 'ORDEN_TRABAJO', 'UPDATE', :NEW.ID_OT, :OLD.ESTADO, :NEW.ESTADO, USER, SYSDATE);
+
+    ELSIF DELETING THEN
+        INSERT INTO BITACORA (ID_BITACORA, TABLA, OPERACION, ID_REGISTRO, VALOR_ANTERIOR, VALOR_NUEVO, USUARIO_BD, FECHA)
+        VALUES (SEQ_BITACORA.NEXTVAL, 'ORDEN_TRABAJO', 'DELETE', :OLD.ID_OT, :OLD.NRO_OT || ' - ' || :OLD.ESTADO, NULL, USER, SYSDATE);
+    END IF;
+END;
