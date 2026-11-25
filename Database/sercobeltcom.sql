@@ -1478,6 +1478,8 @@ BEGIN
 END;
 /
 
+-- agregue procedimientos de lectura para alertas y bitacoras y el de marcar alerta para que el flask los muestre en el front-end
+
 CREATE OR REPLACE PROCEDURE LISTAR_ALERTAS (
     p_cursor OUT SYS_REFCURSOR
 ) AS
