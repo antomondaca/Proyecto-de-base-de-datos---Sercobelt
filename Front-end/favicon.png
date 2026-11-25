@@ -1,0 +1,10 @@
+{
+  "description": "Gestiona inventario industrial, órdenes de trabajo, equipos y retornos para Sercobelt, ayudando a los equipos de bodega y supervisión a controlar recursos y faltantes.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}
