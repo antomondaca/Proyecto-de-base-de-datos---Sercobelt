@@ -88,7 +88,7 @@ export default function Crud({ cat }: { cat: Cat }) {
           <form onSubmit={save} className="space-y-4">
             {fields.map((f) => {
               const lockedPk = !creating && pk.length > 1 && pk.includes(f.key)
-              const req = f.type === 'password' ? creating : f.req
+              const req = f.type === 'password' ? true : f.req
               return (
                 <FormField key={f.key} label={`${f.key}${req ? ' *' : ''}`}>
                   {f.type === 'fk' ? (
@@ -102,7 +102,7 @@ export default function Crud({ cat }: { cat: Cat }) {
                     <input name={f.key} required={req} type="number" step="0.01" min="0.01" max="999999.99" defaultValue={edit[f.key] ?? ''} className={inputCls} />
                   ) : (
                     <input name={f.key} required={req} maxLength={f.max} type={f.type === 'date' ? 'date' : f.type === 'password' ? 'password' : 'text'}
-                      placeholder={f.type === 'password' ? (creating ? '' : 'Dejar en blanco para conservar') : undefined} defaultValue={f.type === 'password' ? '' : edit[f.key] ?? ''} className={inputCls} />
+                      placeholder={f.type === 'password' ? (creating ? '' : 'Obligatoria: ACTUALIZAR_USUARIO exige PASSWORD_HASH') : undefined} defaultValue={f.type === 'password' ? '' : edit[f.key] ?? ''} className={inputCls} />
                   )}
                 </FormField>
               )
@@ -116,7 +116,7 @@ export default function Crud({ cat }: { cat: Cat }) {
           <p className="text-sm text-slate-600">¿Confirma que desea eliminar el registro <b>{pk.map((k) => `${k}=${del[k]}`).join(', ')}</b> de {table}? Si tiene registros asociados, la base de datos rechazará la operación.</p>
           <div className="mt-5 flex justify-end gap-2">
             <button className={btnGhost} onClick={() => setDel(null)}>Cancelar</button>
-            <button className="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700" onClick={() => { act(`${cat.nuevo} eliminado (ELIMINAR_${table})`, () => deleteRow(table, del)); setDel(null) }}>Eliminar</button>
+            <button className="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700" onClick={async () => { await act(`${cat.nuevo} eliminado (ELIMINAR_${table})`, () => deleteRow(table, del)); setDel(null) }}>Eliminar</button>
           </div>
         </Modal>
       )}

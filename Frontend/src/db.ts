@@ -14,11 +14,25 @@ export type DB = { [K in T]: Row[] }
 
 const API: string = (import.meta as any).env?.VITE_API ?? 'http://localhost:5000/api'
 
+// Error devuelto por Flask/Oracle (la operación NO se ejecutó)
+export class ApiError extends Error {
+  constructor(message: string, public status: number) { super(message) }
+}
+// La operación sí se guardó en Oracle, pero falló la recarga posterior de datos
+export class RefreshError extends Error {}
+
+let onUnauthorized: (() => void) | null = null
+export const setUnauthorizedHandler = (fn: (() => void) | null) => { onUnauthorized = fn }
+
 async function req(path: string, init?: RequestInit) {
   let r: Response
-  try { r = await fetch(API + path, init) } catch { throw new Error('No se pudo conectar con Flask (' + API + ')') }
+  try { r = await fetch(API + path, init) } catch { throw new ApiError('No se pudo conectar con Flask (' + API + ')', 0) }
   const j = await r.json().catch(() => ({}))
-  if (!r.ok) throw new Error(j.error ?? 'Error del servidor')
+  if (!r.ok) {
+    if (r.status === 401 && path !== '/login') onUnauthorized?.()
+    if (r.status === 403) throw new ApiError(j.error ?? 'Acceso denegado: su perfil no tiene permiso para esta operación', 403)
+    throw new ApiError(j.error ?? 'Error del servidor', r.status)
+  }
   return j
 }
 
@@ -39,8 +53,23 @@ const norm = (t: T, r: Row): Row => {
 
 export const listar = (nombre: string): Promise<Row[]> => req('/list/' + nombre)
 
-export async function loadAll() {
-  const tablas = Object.keys(PK) as T[]
+// Listas necesarias por perfil (los permisos reales deben aplicarse en Flask)
+const BASE_GESTORES: T[] = ['FAENA', 'TIPO_TRABAJO', 'VEHICULO', 'PERSONAL', 'PLANTILLA_ITEM', 'ITEM', 'CATEGORIA_ITEM', 'ORDEN_TRABAJO', 'CHECKLIST_DETALLE', 'UNIDAD_EQUIPO', 'ALERTA']
+export function listasParaRol(rol: string): T[] {
+  const r = rol.trim().toLowerCase()
+  const todas = Object.keys(PK) as T[]
+  if (r === 'administrador') return todas
+  if (r === 'jefe de bodega') return todas.filter((t) => !['USUARIO', 'ROL', 'BITACORA'].includes(t))
+  if (r === 'supervisor') return BASE_GESTORES
+  if (r === 'gerencia') return ['ALERTA', 'BITACORA']
+  return []
+}
+let currentRol = ''
+export const clearData = () => { currentRol = ''; db = empty(); subs.forEach((s) => s()) }
+
+export async function loadAll(rol: string = currentRol) {
+  currentRol = rol
+  const tablas = listasParaRol(rol)
   const datos = await Promise.all(tablas.map((t) => listar(t)))
   const next = empty()
   tablas.forEach((t, i) => { next[t] = datos[i].map((r) => norm(t, r)) })
@@ -48,8 +77,15 @@ export async function loadAll() {
   subs.forEach((s) => s())
 }
 
+// Reportes: se consultan directamente a Flask (REPORTE_* de Oracle), sin cache global
+export type ReporteNombre = 'REPORTE_FUERA_BODEGA' | 'REPORTE_PENDIENTES_FALTANTES' | 'REPORTE_CONSUMO_MENSUAL'
+export const cargarReporte = (n: ReporteNombre) => listar(n)
+
 const exec = (proc: string, args: any[]) => req('/proc/' + proc, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ args }) })
-const call = async (proc: string, args: any[]) => { await exec(proc, args); await loadAll(); return [] as string[] }
+const refresh = async () => {
+  try { await loadAll() } catch (e) { throw new RefreshError('La operación se guardó correctamente en Oracle, pero no se pudo actualizar la vista: ' + (e as Error).message) }
+}
+const call = async (proc: string, args: any[]) => { await exec(proc, args); await refresh(); return [] as string[] }
 
 export async function spLogin(username: string, passHash: string) {
   try { return await req('/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username, password_hash: passHash }) }) }
@@ -80,8 +116,9 @@ export const verificarDespacharItem = (id: number, unidad: number | null, cant: 
   call('VERIFICAR_DESPACHAR_ITEM', [id, unidad, cant, obs])
 export const confirmarSalidaOt = (id: number) => call('CONFIRMAR_SALIDA_OT', [id])
 export const registrarRetornoLote = async (rows: { id: number; cant: number; obs: string | null }[]) => {
-  for (const r of rows) await exec('REGISTRAR_RETORNO_ITEM', [r.id, r.cant, r.obs])
-  await loadAll()
+  try { for (const r of rows) await exec('REGISTRAR_RETORNO_ITEM', [r.id, r.cant, r.obs]) }
+  catch (e) { await loadAll().catch(() => {}); throw e } // algunos ítems pudieron quedar registrados
+  await refresh()
   return [] as string[]
 }
 export const cerrarOrdenTrabajo = (id: number) => call('CERRAR_ORDEN_TRABAJO', [id])

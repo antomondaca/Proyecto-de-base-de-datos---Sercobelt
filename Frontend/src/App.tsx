@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { AlertTriangle, Briefcase, Building2, Cpu, Factory, FileSpreadsheet, MapPin, Package, ShieldCheck, Tags, Bell, ClipboardCheck, ClipboardList, Construction, Database, FileBarChart, HardHat, LogOut, PackageCheck, ScrollText, ShoppingCart, Truck, Users, Wrench, Zap } from 'lucide-react'
 import Checklist from './views/Checklist'
 import Verificacion from './views/Verificacion'
@@ -9,7 +9,8 @@ import Crud from './views/Crud'
 import { Alertas, Bitacora, Reporte } from './views/Sistema'
 import { CATALOGS } from './catalogs'
 import { AppCtx } from './ctx'
-import { hash, loadAll, spLogin, useDB } from './db'
+import { allowedPages, canAtenderAlertas } from './perms'
+import { ApiError, RefreshError, clearData, hash, loadAll, setUnauthorizedHandler, spLogin, useDB } from './db'
 import { Field, btnPrimary, card, inputCls } from './ui'
 
 const GROUPS = [
@@ -19,7 +20,7 @@ const GROUPS = [
   { name: 'Sistema', items: ['Alertas', 'Bitácora de Cambios'] },
 ]
 const ICONS: Record<string, typeof Bell> = { 'Armado de Checklist': ClipboardList, 'Verificación y Salida': ClipboardCheck, 'Retorno y Conciliación': PackageCheck, 'Mantención y Calibración': Wrench, 'Requerimiento de Compra': ShoppingCart, Clientes: Building2, Faenas: MapPin, Proveedores: Factory, 'Tipos de Trabajo': Briefcase, Categorías: Tags, Ítems: Package, 'Unidades de Equipo': Cpu, Roles: ShieldCheck, 'Plantilla de Ítems': FileSpreadsheet, Vehículos: Truck, Personal: HardHat, Usuarios: Users, Alertas: AlertTriangle, 'Bitácora de Cambios': ScrollText }
-type Toast = { kind: 'ok' | 'err'; text: string; notes: string[] }
+type Toast = { kind: 'ok' | 'err' | 'warn'; text: string; notes: string[] }
 type Session = { ID_USUARIO: number; ID_ROL: number; ROL: string; NOMBRE_PERSONA: string }
 
 export default function App() {
@@ -30,17 +31,35 @@ export default function App() {
   const [toast, setToast] = useState<Toast | null>(null)
   const [err, setErr] = useState('')
 
-  const act = async (ok: string, fn: () => Promise<string[]>) => {
+  const [busy, setBusy] = useState(false)
+  const busyRef = useRef(false)
+  const [loading, setLoading] = useState(false)
+  const [loadErr, setLoadErr] = useState('')
+  const show = (t: Toast, ms: number) => { setToast(t); setTimeout(() => setToast(null), ms) }
+
+  const logout = useCallback(() => { clearData(); setSession(null); setLoadErr(''); setBell(false) }, [])
+  const cargar = useCallback((rol: string) => {
+    setLoading(true); setLoadErr('')
+    loadAll(rol).catch((e: Error) => setLoadErr(e.message)).finally(() => setLoading(false))
+  }, [])
+  useEffect(() => {
+    setUnauthorizedHandler(() => { logout(); setErr('La sesión expiró. Inicie sesión nuevamente.') })
+    return () => setUnauthorizedHandler(null)
+  }, [logout])
+
+  // Ejecuta una operación contra Flask/Oracle bloqueando la interfaz mientras dura
+  const act = async (ok: string, fn: () => Promise<string[]>): Promise<boolean> => {
+    if (busyRef.current) return false
+    busyRef.current = true; setBusy(true)
     try {
       const notes = await fn()
-      setToast({ kind: 'ok', text: ok, notes })
-      setTimeout(() => setToast(null), notes.length ? 7000 : 3000)
+      show({ kind: 'ok', text: ok, notes }, 3500)
       return true
     } catch (e) {
-      setToast({ kind: 'err', text: (e as Error).message, notes: [] })
-      setTimeout(() => setToast(null), 6000)
+      if (e instanceof RefreshError) { show({ kind: 'warn', text: e.message, notes: [] }, 9000); return true }
+      show({ kind: 'err', text: e instanceof ApiError && e.status === 403 ? 'Acceso denegado: ' + e.message : (e as Error).message, notes: [] }, 7000)
       return false
-    }
+    } finally { busyRef.current = false; setBusy(false) }
   }
   const pendientes = db.ALERTA.filter((a) => a.ATENDIDA === 'N').sort((a, b) => b.ID_ALERTA - a.ID_ALERTA)
 
@@ -50,10 +69,12 @@ export default function App() {
         <form onSubmit={async (e) => {
           e.preventDefault()
           const fd = new FormData(e.currentTarget)
+          setBusy(true); setErr('')
           try {
             const u = await spLogin(String(fd.get('u')), hash(String(fd.get('p'))))
-            if (u) { await loadAll(); setSession(u as Session); setErr('') } else setErr("Usuario o contraseña incorrectos, o usuario con ESTADO distinto de 'A'.")
-          } catch (x) { setErr((x as Error).message) }
+            if (u) { setSession(u as Session); setPage(allowedPages(u.ROL)[0]); cargar(u.ROL) }
+            else setErr("Usuario o contraseña incorrectos, o usuario con ESTADO distinto de 'A'.")
+          } catch (ex) { setErr((ex as Error).message) } finally { setBusy(false) }
         }} className={`${card} w-full max-w-sm space-y-4 p-8 shadow-xl`}>
           <div className="text-center">
             <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-lg bg-primary text-white"><Construction /></div>
@@ -63,14 +84,14 @@ export default function App() {
           <Field label="USERNAME"><input name="u" required maxLength={30} className={inputCls} placeholder="mfuentes" autoFocus /></Field>
           <Field label="Contraseña"><input name="p" required type="password" className={inputCls} placeholder="••••••••" /></Field>
           {err && <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">{err}</p>}
-          <button className={`${btnPrimary} w-full justify-center`}>Ingresar</button>
-          <p className="text-center text-xs text-slate-500">Demo: mfuentes, palarcon, cmunoz o rvega · contraseña <span className="font-mono">sercobelt2026</span></p>
+          <button disabled={busy} className={`${btnPrimary} w-full justify-center disabled:opacity-60`}>{busy ? 'Ingresando...' : 'Ingresar'}</button>
         </form>
       </div>
     )
 
   const cat = CATALOGS[page]
-  const body = page === 'Armado de Checklist' ? <Checklist />
+  const denied = !allowedPages(session.ROL).includes(page)
+  const body = denied ? <div className={`${card} py-20 text-center`}><p className="font-semibold">Acceso denegado</p><p className="text-sm text-slate-500">Su perfil ({session.ROL}) no tiene permiso para esta sección.</p></div> : page === 'Armado de Checklist' ? <Checklist />
     : page === 'Verificación y Salida' ? <Verificacion />
     : page === 'Retorno y Conciliación' ? <Retorno />
     : page === 'Mantención y Calibración' ? <Mantencion />
@@ -82,25 +103,19 @@ export default function App() {
     : page === 'Consumo por OT/Cliente' ? <Reporte kind="consumo" />
     : <Crud key={page} cat={cat} />
 
-  const cambiarPerfil = (idRol: number) => {
-    const u = db.USUARIO.find((x) => x.ID_ROL === idRol && x.ESTADO === 'A')
-    const rol = db.ROL.find((r) => r.ID_ROL === idRol)!
-    setSession({ ID_USUARIO: u?.ID_USUARIO ?? 0, ID_ROL: idRol, ROL: rol.NOMBRE_ROL, NOMBRE_PERSONA: u ? (db.PERSONAL.find((p) => p.ID_PERSONAL === u.ID_PERSONAL)?.NOMBRE ?? u.USERNAME) : '(sin usuario activo)' })
-  }
-
+  const allowed = allowedPages(session.ROL)
   return (
-    <AppCtx.Provider value={{ act, go: setPage }}>
+    <AppCtx.Provider value={{ act, busy, go: (p) => { if (allowed.includes(p)) setPage(p) }, canAtender: canAtenderAlertas(session.ROL) }}>
       <div className="flex min-h-screen">
         <aside className="sticky top-0 flex h-screen w-64 shrink-0 flex-col bg-primary text-white">
           <div className="flex items-center gap-2 px-5 py-5"><div className="flex h-8 w-8 items-center justify-center rounded bg-accent"><Construction size={18} /></div><span className="text-lg font-bold tracking-widest">SERCOBELT</span></div>
-          <div className="px-4 pb-3">
-            <label className="mb-1 block text-[10px] uppercase tracking-wider text-blue-200">Vista de perfil (ROL)</label>
-            <select value={session.ID_ROL} onChange={(e) => cambiarPerfil(Number(e.target.value))} className="w-full rounded-md border border-white/20 bg-white/10 px-2 py-2 text-sm outline-none">
-              {db.ROL.map((r) => <option key={r.ID_ROL} value={r.ID_ROL} className="text-ink">{r.NOMBRE_ROL}</option>)}
-            </select>
+          <div className="mx-4 mb-3 rounded-md border border-white/20 bg-white/10 px-3 py-2">
+            <div className="text-[10px] uppercase tracking-wider text-blue-200">Sesión activa</div>
+            <div className="truncate text-sm font-medium">{session.NOMBRE_PERSONA}</div>
+            <div className="text-xs text-blue-100">{session.ROL}</div>
           </div>
           <nav className="flex-1 overflow-y-auto px-3 pb-4">
-            {GROUPS.map((g) => (
+            {GROUPS.map((g) => ({ ...g, items: g.items.filter((it) => allowed.includes(it)) })).filter((g) => g.items.length > 0).map((g) => (
               <div key={g.name} className="mt-4">
                 <div className="px-2 pb-1 text-[11px] font-semibold uppercase tracking-wider text-blue-200">{g.name}</div>
                 {g.items.map((it) => {
@@ -117,6 +132,7 @@ export default function App() {
             ))}
           </nav>
         </aside>
+        <fieldset disabled={busy} className="contents">
         <div className="min-w-0 flex-1">
           <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-slate-200 bg-white px-8">
             <h1 className="text-lg font-semibold">{page}</h1>
@@ -132,13 +148,19 @@ export default function App() {
                 )}
               </div>
               <div className="text-right leading-tight"><div className="text-sm font-medium">{session.NOMBRE_PERSONA}</div><div className="text-xs text-slate-500">{session.ROL}</div></div>
-              <button onClick={() => setSession(null)} className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 px-3 py-1.5 text-sm hover:bg-slate-50"><LogOut size={15} />Cerrar sesión</button>
+              <button onClick={logout} className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 px-3 py-1.5 text-sm hover:bg-slate-50"><LogOut size={15} />Cerrar sesión</button>
             </div>
           </header>
-          <main className="p-8">{body}</main>
+          <main className="p-8">
+            {loading ? <div className={`${card} flex items-center justify-center gap-3 py-24 text-slate-500`}><span className="h-5 w-5 animate-spin rounded-full border-2 border-slate-300 border-t-primary" />Cargando datos desde Oracle...</div>
+              : loadErr ? <div className={`${card} border-red-200 bg-red-50 py-16 text-center text-red-700`}><p className="font-semibold">No se pudieron cargar los datos</p><p className="mt-1 text-sm">{loadErr}</p><button onClick={() => cargar(session.ROL)} className={`${btnPrimary} mt-4`}>Reintentar</button></div>
+              : body}
+          </main>
         </div>
+        </fieldset>
+        {busy && <div className="fixed inset-x-0 top-0 z-[60] h-1 animate-pulse bg-accent" />}
         {toast && (
-          <div className={`fixed bottom-6 right-6 z-50 max-w-md rounded-lg px-4 py-3 text-sm text-white shadow-lg ${toast.kind === 'err' ? 'bg-red-700' : 'bg-ink'}`}>
+          <div className={`fixed bottom-6 right-6 z-50 max-w-md rounded-lg px-4 py-3 text-sm text-white shadow-lg ${toast.kind === 'err' ? 'bg-red-700' : toast.kind === 'warn' ? 'bg-amber-700' : 'bg-ink'}`}>
             <div className="font-medium">{toast.text}</div>
             {toast.notes.map((n, i) => <div key={i} className="mt-1.5 flex items-start gap-1.5 text-xs text-orange-200"><Zap size={12} className="mt-0.5 shrink-0" /><span>TRIGGER {n}</span></div>)}
           </div>
