@@ -1,8 +1,8 @@
 import { useState } from 'react'
-import { Plus, Send, Trash2 } from 'lucide-react'
+import { Send } from 'lucide-react'
 import { crearOtConChecklist, useDB, type DB } from '../db'
 import { useApp } from '../ctx'
-import { Badge, Field, btnGhost, btnPrimary, card, fmt, inputCls, th } from '../ui'
+import { Badge, Field, btnPrimary, card, fmt, inputCls, th } from '../ui'
 
 type Line = { ID_ITEM: number; CANTIDAD: number }
 const plantilla = (db: DB, tipo: number): Line[] => db.PLANTILLA_ITEM.filter((p) => p.ID_TIPO_TRABAJO === tipo).map((p) => ({ ID_ITEM: p.ID_ITEM, CANTIDAD: p.CANTIDAD_ESTANDAR }))
@@ -15,22 +15,19 @@ export default function Checklist() {
   const sup = activos('PERSONAL').filter((p) => /supervisor/i.test(p.CARGO))
   const mae = activos('PERSONAL').filter((p) => /maestro/i.test(p.CARGO))
   const [f, setF] = useState({
-    nro: `OT-2026-${String(db.ORDEN_TRABAJO.length).padStart(3, '0')}`,
+    nro: `OT-2026-${String(db.ORDEN_TRABAJO.length + 1).padStart(3, '0')}`,
     faena: db.FAENA[0]?.ID_FAENA, tipo: db.TIPO_TRABAJO[0]?.ID_TIPO_TRABAJO, veh: activos('VEHICULO')[0]?.ID_VEHICULO,
     sup: sup[0]?.ID_PERSONAL, mae: mae[0]?.ID_PERSONAL, ret: plusDays(3),
   })
   const [lines, setLines] = useState<Line[]>(() => plantilla(db, db.TIPO_TRABAJO[0]?.ID_TIPO_TRABAJO))
-  const [adding, setAdding] = useState(false)
-  const [newItem, setNewItem] = useState('')
   const set = (k: string, v: any) => setF({ ...f, [k]: v })
   const item = (id: number) => db.ITEM.find((i) => i.ID_ITEM === id)!
-  const disponibles = db.ITEM.filter((i) => !lines.some((l) => l.ID_ITEM === i.ID_ITEM))
   const num = (v: string) => Number(v)
   const sel = (k: string, rows: any[], pk: string, label: (r: any) => string) => (
     <select className={inputCls} value={(f as any)[k] ?? ''} onChange={(e) => set(k, num(e.target.value))}>{rows.map((r) => <option key={r[pk]} value={r[pk]}>{label(r)}</option>)}</select>
   )
-  const guardar = () => {
-    const ok = act('OT creada en estado Borrador (CREAR_OT_CON_CHECKLIST)', () => crearOtConChecklist({ id_faena: f.faena, id_tipo_trabajo: f.tipo, id_vehiculo: f.veh!, id_supervisor: f.sup!, id_maestro: f.mae!, nro_ot: f.nro, fecha_retorno_prevista: f.ret || null }, lines))
+  const guardar = async () => {
+    const ok = await act('OT creada en estado Borrador (CREAR_OT_CON_CHECKLIST)', () => crearOtConChecklist({ id_faena: f.faena, id_tipo_trabajo: f.tipo, id_vehiculo: f.veh!, id_supervisor: f.sup!, id_maestro: f.mae!, nro_ot: f.nro, fecha_retorno_prevista: f.ret || null }, lines))
     if (ok) go('Verificación y Salida')
   }
   const valid = f.nro.trim() && f.veh && f.sup && f.mae && lines.length > 0 && lines.every((l) => l.CANTIDAD > 0)
@@ -55,22 +52,15 @@ export default function Checklist() {
           <Field label="FECHA_RETORNO_PREVISTA"><input type="date" className={inputCls} value={f.ret} onChange={(e) => set('ret', e.target.value)} /></Field>
           <Field label="FECHA_SALIDA"><input disabled className={inputCls} value={fmt(new Date().toISOString())} /></Field>
         </div>
-        <p className="mt-3 text-xs text-slate-500">Al cambiar el tipo de trabajo se carga PLANTILLA_ITEM (CANTIDAD_ESTANDAR), como hace el procedimiento CREAR_OT_CON_CHECKLIST.</p>
+        <p className="mt-3 text-xs text-slate-500">El checklist se genera en Oracle desde PLANTILLAS_ITEMS (CANTIDAD_ESTANDAR) al ejecutar CREAR_OT_CON_CHECKLIST.</p>
       </section>
       <section className={card}>
         <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4">
           <h2 className="font-semibold">CHECKLIST_DETALLE <span className="ml-1 text-sm font-normal text-slate-500">({lines.length})</span></h2>
-          <button className={btnGhost} onClick={() => { setAdding(true); setNewItem(String(disponibles[0]?.ID_ITEM ?? '')) }} disabled={!disponibles.length}><Plus size={16} />Agregar Ítem</button>
         </div>
         <table className="w-full text-sm">
           <thead className="bg-slate-50"><tr><th className={th}>ITEM</th><th className={th}>CATEGORIA</th><th className={th}>ID_UNIDAD / CODIGO</th><th className={th}>CANTIDAD_REQUERIDA</th><th className={th}>ESTADO_ITEM</th><th className={th} /></tr></thead>
           <tbody className="divide-y divide-slate-100">
-            {adding && (
-              <tr className="bg-orange-50/50">
-                <td className="px-4 py-2" colSpan={3}><select className={inputCls} value={newItem} onChange={(e) => setNewItem(e.target.value)}>{disponibles.map((i) => <option key={i.ID_ITEM} value={i.ID_ITEM}>{i.NOMBRE}{i.DIMENSION ? ` (${i.DIMENSION})` : ''}</option>)}</select></td>
-                <td colSpan={3} className="px-4 py-2"><div className="flex justify-end gap-2"><button className={btnGhost} onClick={() => setAdding(false)}>Cancelar</button><button className={btnPrimary} onClick={() => { setLines([...lines, { ID_ITEM: Number(newItem), CANTIDAD: 1 }]); setAdding(false) }}>Añadir</button></div></td>
-              </tr>
-            )}
             {lines.map((l) => {
               const it = item(l.ID_ITEM)
               return (
@@ -78,9 +68,9 @@ export default function Checklist() {
                   <td className="px-4 py-3 font-medium">{it.NOMBRE}{it.DIMENSION && <span className="ml-1 text-xs font-normal text-slate-500">{it.DIMENSION}</span>}</td>
                   <td className="px-4 py-3 text-slate-600">{db.CATEGORIA_ITEM.find((c) => c.ID_CATEGORIA === it.ID_CATEGORIA)?.NOMBRE}</td>
                   <td className="px-4 py-3 text-xs text-slate-500">{it.ES_IDENTIFICABLE === 'S' ? 'NULL — se asigna en verificación' : '—'}</td>
-                  <td className="px-4 py-3"><input type="number" step="0.01" min="0.01" max="999999.99" value={l.CANTIDAD} onChange={(e) => setLines(lines.map((x) => x.ID_ITEM === l.ID_ITEM ? { ...x, CANTIDAD: Number(e.target.value) } : x))} className={`${inputCls} w-28`} /> <span className="text-xs text-slate-500">{it.UNIDAD}</span></td>
+                  <td className="px-4 py-3">{l.CANTIDAD} <span className="text-xs text-slate-500">{it.UNIDAD}</span></td>
                   <td className="px-4 py-3"><Badge estado="Pendiente" /></td>
-                  <td className="px-4 py-3 text-right"><button title="Eliminar" onClick={() => setLines(lines.filter((x) => x.ID_ITEM !== l.ID_ITEM))} className="rounded p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-600"><Trash2 size={16} /></button></td>
+                  <td className="px-4 py-3" />
                 </tr>
               )
             })}

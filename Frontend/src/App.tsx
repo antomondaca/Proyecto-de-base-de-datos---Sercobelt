@@ -9,7 +9,7 @@ import Crud from './views/Crud'
 import { Alertas, Bitacora, Reporte } from './views/Sistema'
 import { CATALOGS } from './catalogs'
 import { AppCtx } from './ctx'
-import { hash, spLogin, useDB } from './db'
+import { hash, loadAll, spLogin, useDB } from './db'
 import { Field, btnPrimary, card, inputCls } from './ui'
 
 const GROUPS = [
@@ -25,14 +25,14 @@ type Session = { ID_USUARIO: number; ID_ROL: number; ROL: string; NOMBRE_PERSONA
 export default function App() {
   const db = useDB()
   const [page, setPage] = useState('Armado de Checklist')
-  const [session, setSession] = useState<Session | null>({ ID_USUARIO: 1, ID_ROL: 1, ROL: 'Administrador', NOMBRE_PERSONA: 'Marcela Fuentes' })
+  const [session, setSession] = useState<Session | null>(null)
   const [bell, setBell] = useState(false)
   const [toast, setToast] = useState<Toast | null>(null)
   const [err, setErr] = useState('')
 
-  const act = (ok: string, fn: () => string[]) => {
+  const act = async (ok: string, fn: () => Promise<string[]>) => {
     try {
-      const notes = fn()
+      const notes = await fn()
       setToast({ kind: 'ok', text: ok, notes })
       setTimeout(() => setToast(null), notes.length ? 7000 : 3000)
       return true
@@ -47,11 +47,13 @@ export default function App() {
   if (!session)
     return (
       <div className="flex min-h-screen items-center justify-center bg-primary p-6">
-        <form onSubmit={(e) => {
+        <form onSubmit={async (e) => {
           e.preventDefault()
           const fd = new FormData(e.currentTarget)
-          const u = spLogin(String(fd.get('u')), hash(String(fd.get('p'))))
-          if (u) { setSession(u as Session); setErr('') } else setErr("Usuario o contraseña incorrectos, o usuario con ESTADO distinto de 'A'.")
+          try {
+            const u = await spLogin(String(fd.get('u')), hash(String(fd.get('p'))))
+            if (u) { await loadAll(); setSession(u as Session); setErr('') } else setErr("Usuario o contraseña incorrectos, o usuario con ESTADO distinto de 'A'.")
+          } catch (x) { setErr((x as Error).message) }
         }} className={`${card} w-full max-w-sm space-y-4 p-8 shadow-xl`}>
           <div className="text-center">
             <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-lg bg-primary text-white"><Construction /></div>

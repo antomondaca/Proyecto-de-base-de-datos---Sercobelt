@@ -29,7 +29,7 @@ export default function Crud({ cat }: { cat: Cat }) {
     if (s === '') return null
     return f.type === 'number' || f.type === 'fk' ? Number(s) : s
   }
-  const save = (e: React.FormEvent<HTMLFormElement>) => {
+  const save = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     const fd = new FormData(e.currentTarget)
     const v: Row = {}
@@ -38,7 +38,7 @@ export default function Crud({ cat }: { cat: Cat }) {
       if (edit && pk.length > 1 && pk.includes(f.key)) continue
       v[f.key] = conv(f, fd.get(f.key))
     }
-    const ok = act(creating ? `${cat.nuevo} creado (INSERTAR_${table})` : `${cat.nuevo} actualizado (ACTUALIZAR_${table})`, () => {
+    const ok = await act(creating ? `${cat.nuevo} creado (INSERTAR_${table})` : `${cat.nuevo} actualizado (ACTUALIZAR_${table})`, () => {
       if (creating) {
         if (pk.length > 1) for (const k of pk) v[k] = conv(fields.find((f) => f.key === k)!, fd.get(k))
         return insertRow(table, v)

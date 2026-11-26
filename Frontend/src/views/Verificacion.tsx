@@ -54,7 +54,7 @@ export default function Verificacion() {
                   <td className="px-4 py-3">{ver ? d.CANTIDAD_DESPACHADA : <input type="number" min={0} step="0.01" className={`${inputCls} w-24`} value={cant} onChange={(e) => up(d.ID_DETALLE, { c: e.target.value })} />}</td>
                   <td className="px-4 py-3">{ver ? fmt(d.OBSERVACION) : <input maxLength={250} className={inputCls} value={dr.o ?? ''} onChange={(e) => up(d.ID_DETALLE, { o: e.target.value })} />}</td>
                   <td className="px-4 py-3"><Badge estado={d.ESTADO_ITEM} /></td>
-                  <td className="px-4 py-3">{d.VERIFICADO}{ver && <span className="ml-1 text-xs text-slate-500">{fmt(d.FECHA_VERIFICACION)}</span>}</td>
+                  <td className="px-4 py-3">{ver ? 'Sí' : 'No'}{ver && <span className="ml-1 text-xs text-slate-500">{fmt(d.FECHA_VERIFICACION)}</span>}</td>
                   <td className="px-4 py-3 text-right">{!ver && <button className={btnPrimary} disabled={!ok} onClick={() => act(`Ítem verificado (VERIFICAR_DESPACHAR_ITEM)`, () => verificarDespacharItem(d.ID_DETALLE, dr.u ? Number(dr.u) : null, Number(cant), dr.o || null))}><CheckCircle2 size={15} />Verificar</button>}</td>
                 </tr>
               )
