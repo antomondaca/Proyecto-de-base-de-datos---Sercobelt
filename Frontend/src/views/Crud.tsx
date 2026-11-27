@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Pencil, Plus, Search, Trash2 } from 'lucide-react'
-import { type Row, PK, deleteRow, hash, insertRow, updateRow, useDB } from '../db'
+import { type Row, PK, deleteRow, insertRow, updateRow, useDB } from '../db'
 import type { Cat, Field } from '../catalogs'
 import { useApp } from '../ctx'
 import RutInput from '../RutInput'
@@ -34,11 +34,17 @@ export default function Crud({ cat }: { cat: Cat }) {
     e.preventDefault()
     const fd = new FormData(e.currentTarget)
     const v: Row = {}
+
     for (const f of fields) {
-      if (f.type === 'password') { const p = String(fd.get(f.key) ?? ''); if (p) v[f.key] = hash(p); continue }
-      if (edit && pk.length > 1 && pk.includes(f.key)) continue
-      v[f.key] = conv(f, fd.get(f.key))
+      if (f.type === 'password') {
+        const p = String(fd.get(f.key) ?? '')
+        if (p) v[f.key] = p
+      continue
     }
+
+    if (edit && pk.length > 1 && pk.includes(f.key)) continue
+    v[f.key] = conv(f, fd.get(f.key))
+  }
     const ok = await act(creating ? `${cat.nuevo} creado (INSERTAR_${table})` : `${cat.nuevo} actualizado (ACTUALIZAR_${table})`, () => {
       if (creating) {
         if (pk.length > 1) for (const k of pk) v[k] = conv(fields.find((f) => f.key === k)!, fd.get(k))
@@ -89,7 +95,7 @@ export default function Crud({ cat }: { cat: Cat }) {
           <form onSubmit={save} className="space-y-4">
             {fields.map((f) => {
               const lockedPk = !creating && pk.length > 1 && pk.includes(f.key)
-              const req = f.type === 'password' ? true : f.req
+              const req = f.type === 'password' ? creating : f.req
               return (
                 <FormField key={f.key} label={`${f.key}${req ? ' *' : ''}`}>
                   {f.type === 'fk' ? (
@@ -104,8 +110,29 @@ export default function Crud({ cat }: { cat: Cat }) {
                   ) : f.key === 'RUT' ? (
                     <RutInput name={f.key} required={req} defaultValue={edit[f.key]} className={inputCls} />
                   ) : (
-                    <input name={f.key} required={req} maxLength={f.max} type={f.type === 'date' ? 'date' : f.type === 'password' ? 'password' : 'text'}
-                      placeholder={f.type === 'password' ? (creating ? '' : 'Obligatoria: ACTUALIZAR_USUARIO exige PASSWORD_HASH') : undefined} defaultValue={f.type === 'password' ? '' : edit[f.key] ?? ''} className={inputCls} />
+                    <input
+                      name={f.key}
+                      required={req}
+                      maxLength={f.max}
+                      type={
+                        f.type === 'password'
+                            ? 'password'
+                            : f.type === 'date'
+                            ? 'date'
+                            : 'text'
+                      }
+                      defaultValue={
+                        f.type === 'password' ? '' : (edit[f.key] ?? '')
+                      }
+                      className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+                      placeholder={
+                      f.type === 'password'
+                        ? (creating
+                          ? 'Ingrese una contraseña de al menos 12 caracteres'
+                          : 'Dejar vacío para conservar la contraseña actual')
+                        : undefined
+                      }
+                    />
                   )}
                 </FormField>
               )

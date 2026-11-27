@@ -10,7 +10,7 @@ import { Alertas, Bitacora, Reporte } from './views/Sistema'
 import { CATALOGS } from './catalogs'
 import { AppCtx } from './ctx'
 import { allowedPages, canAtenderAlertas } from './perms'
-import { ApiError, RefreshError, clearData, hash, loadAll, setUnauthorizedHandler, spLogin, useDB } from './db'
+import { ApiError, RefreshError, clearData, getSession, loadAll, logoutServer, setUnauthorizedHandler, spLogin, useDB } from './db'
 import { Field, btnPrimary, card, inputCls } from './ui'
 
 const GROUPS = [
@@ -27,6 +27,8 @@ export default function App() {
   const db = useDB()
   const [page, setPage] = useState('Armado de Checklist')
   const [session, setSession] = useState<Session | null>(null)
+  const [checking, setChecking] = useState(true)
+  const [sessionErr, setSessionErr] = useState('')
   const [bell, setBell] = useState(false)
   const [toast, setToast] = useState<Toast | null>(null)
   const [err, setErr] = useState('')
@@ -47,6 +49,24 @@ export default function App() {
     return () => setUnauthorizedHandler(null)
   }, [logout])
 
+  // Recupera la sesión (cookie HttpOnly) al montar la app y al reintentar tras un error de conexión
+  const restaurarSesion = useCallback(() => {
+    setChecking(true); setSessionErr('')
+    getSession()
+      .then((u) => { if (u) { setSession(u as Session); setPage(allowedPages(u.ROL)[0]); cargar(u.ROL) } })
+      .catch((e: Error) => setSessionErr(e.message))
+      .finally(() => setChecking(false))
+  }, [cargar])
+  const iniciado = useRef(false)
+  useEffect(() => { if (iniciado.current) return; iniciado.current = true; restaurarSesion() }, [restaurarSesion])
+  const cerrarSesion = async () => {
+    if (busyRef.current) return
+    busyRef.current = true; setBusy(true)
+    try { await logoutServer(); logout() }
+    catch (e) { show({ kind: 'err', text: 'No se pudo cerrar la sesión. Reintente: ' + (e as Error).message, notes: [] }, 9000) }
+    finally { busyRef.current = false; setBusy(false) }
+  }
+
   // Ejecuta una operación contra Flask/Oracle bloqueando la interfaz mientras dura
   const act = async (ok: string, fn: () => Promise<string[]>): Promise<boolean> => {
     if (busyRef.current) return false
@@ -63,6 +83,18 @@ export default function App() {
   }
   const pendientes = db.ALERTA.filter((a) => a.ATENDIDA === 'N').sort((a, b) => b.ID_ALERTA - a.ID_ALERTA)
 
+  if (checking)
+    return <div className="flex min-h-screen items-center justify-center bg-primary text-white"><span className="mr-3 h-5 w-5 animate-spin rounded-full border-2 border-white/40 border-t-white" />Verificando sesión...</div>
+  if (!session && sessionErr)
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-primary p-6">
+        <div className={`${card} w-full max-w-sm space-y-3 p-8 text-center shadow-xl`}>
+          <p className="font-semibold text-red-700">No se pudo verificar la sesión</p>
+          <p className="text-sm text-slate-600">{sessionErr}</p>
+          <button onClick={restaurarSesion} className={`${btnPrimary} w-full justify-center`}>Reintentar</button>
+        </div>
+      </div>
+    )
   if (!session)
     return (
       <div className="flex min-h-screen items-center justify-center bg-primary p-6">
@@ -148,7 +180,7 @@ export default function App() {
                 )}
               </div>
               <div className="text-right leading-tight"><div className="text-sm font-medium">{session.NOMBRE_PERSONA}</div><div className="text-xs text-slate-500">{session.ROL}</div></div>
-              <button onClick={logout} className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 px-3 py-1.5 text-sm hover:bg-slate-50"><LogOut size={15} />Cerrar sesión</button>
+              <button onClick={cerrarSesion} className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 px-3 py-1.5 text-sm hover:bg-slate-50"><LogOut size={15} />Cerrar sesión</button>
             </div>
           </header>
           <main className="p-8">

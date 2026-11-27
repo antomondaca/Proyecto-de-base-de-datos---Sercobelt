@@ -56,7 +56,7 @@ async function req(path: string, init?: RequestInit) {
   const j = await r.json().catch(() => ({}))
 
   if (!r.ok) {
-    if (r.status === 401 && path !== '/login') {
+    if (r.status === 401 && path !== '/login' && path !== '/session') {
       csrfToken = ''
       onUnauthorized?.()
     }
@@ -87,7 +87,7 @@ async function req(path: string, init?: RequestInit) {
 }
 
 
-export const hash = (s: string) => 'sha$' + btoa(unescape(encodeURIComponent(s)))
+export const hash = (s: string) => s
 
 // ---- Cache de lectura (se rellena con los procedimientos LISTAR_ de Oracle)
 const empty = (): DB => Object.fromEntries(Object.keys(PK).map((k) => [k, []])) as unknown as DB
@@ -116,7 +116,7 @@ export function listasParaRol(rol: string): T[] {
   return []
 }
 let currentRol = ''
-export const clearData = () => { currentRol = ''; db = empty(); subs.forEach((s) => s()) }
+export const clearData = () => { currentRol = ''; csrfToken = ''; db = empty(); subs.forEach((s) => s()) }
 
 export async function loadAll(rol: string = currentRol) {
   currentRol = rol
@@ -140,7 +140,8 @@ const call = async (proc: string, args: any[]) => { await exec(proc, args); awai
 
 export async function spLogin(username: string, password: string) {
   try {
-    return await req('/login', {
+    csrfToken = ''
+    const usuario = await req('/login', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -150,11 +151,34 @@ export async function spLogin(username: string, password: string) {
         password
       })
     })
+    if (!csrfToken) {
+      const sesion = await getSession()
+      if (!sesion || !csrfToken) throw new ApiError('No se pudo recuperar el token CSRF de la sesión', 403)
+    }
+    return usuario
   } catch (e) {
     if ((e as Error).message.startsWith('Credenciales')) return null;
     throw e
   }
 }
+// Recupera la sesión autenticada y su token CSRF.
+export async function getSession() {
+  try {
+    const { csrf: _t, ...usuario } = await req('/session')
+    if (!csrfToken) throw new ApiError('No se recibió el token CSRF de la sesión', 403)
+    return usuario
+  } catch (e) {
+    if (e instanceof ApiError && e.status === 401) { csrfToken = ''; return null }
+    throw e
+  }
+}
+
+// Solo confirma el cierre si Flask lo acepta o la sesión ya expiró.
+export async function logoutServer() {
+  try { await req('/logout', { method: 'POST' }) }
+  catch (e) { if (!(e instanceof ApiError && e.status === 401)) throw e }
+}
+
 // ---- Mantenedores: columnas (sin la clave) en el orden de los parametros de INSERTAR_/ACTUALIZAR_
 const COLS: Partial<Record<T, string[]>> = {
   ROL: ['NOMBRE_ROL'], PERSONAL: ['RUT', 'NOMBRE', 'CARGO', 'ESTADO'], CLIENTE: ['RUT', 'RAZON_SOCIAL', 'CONTACTO', 'EMAIL', 'TELEFONO'],
