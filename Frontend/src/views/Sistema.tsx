@@ -30,6 +30,6 @@ export function Alertas() {
 }
 export function Bitacora() {
   const db = useDB()
-  return <DataTable cols={['ID_BITACORA', 'TABLA', 'OPERACION', 'ID_REGISTRO', 'VALOR_ANTERIOR', 'VALOR_NUEVO', 'USUARIO_BD', 'FECHA']} rows={db.BITACORA} />
+  return <DataTable cols={['ID_BITACORA', 'ID_USUARIO', 'TABLA', 'OPERACION', 'ID_REGISTRO', 'VALOR_ANTERIOR', 'VALOR_NUEVO', 'USUARIO_BD', 'FECHA']} rows={db.BITACORA} />
 }
 export { Reporte } from './Dashboards'

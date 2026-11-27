@@ -1,4 +1,4 @@
-// Permisos por rol (ROL.NOMBRE_ROL). Solo controlan la interfaz: la autorización real debe aplicarla Flask.
+// Permisos por rol (ROL.NOMBRE_ROL). Control visual. Flask verifica la misma matriz en cada petición.
 export const GESTORES = ['Armado de Checklist', 'Verificación y Salida', 'Retorno y Conciliación', 'Mantención y Calibración', 'Requerimiento de Compra']
 export const CAT_GENERALES = ['Personal', 'Clientes', 'Faenas', 'Proveedores', 'Vehículos', 'Tipos de Trabajo', 'Categorías', 'Ítems', 'Unidades de Equipo', 'Plantilla de Ítems']
 export const CAT_ADMIN = ['Usuarios', 'Roles']
