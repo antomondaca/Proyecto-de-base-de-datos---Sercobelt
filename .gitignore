@@ -1,3 +1,11 @@
 venv/
 .venv/
+.venv_respaldo/
 __pycache__/
+*.pyc
+node_modules/
+dist/
+.env
+.env.*
+!.env.example
+*.log

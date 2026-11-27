@@ -10,7 +10,7 @@ import { Alertas, Bitacora, Reporte } from './views/Sistema'
 import { CATALOGS } from './catalogs'
 import { AppCtx } from './ctx'
 import { allowedPages, canAtenderAlertas } from './perms'
-import { ApiError, RefreshError, clearData, getSession, loadAll, setUnauthorizedHandler, spLogin, spLogout, useDB } from './db'
+import { ApiError, RefreshError, clearData, hash, loadAll, setUnauthorizedHandler, spLogin, useDB } from './db'
 import { Field, btnPrimary, card, inputCls } from './ui'
 
 const GROUPS = [
@@ -30,7 +30,6 @@ export default function App() {
   const [bell, setBell] = useState(false)
   const [toast, setToast] = useState<Toast | null>(null)
   const [err, setErr] = useState('')
-  const [checking, setChecking] = useState(true)
 
   const [busy, setBusy] = useState(false)
   const busyRef = useRef(false)
@@ -38,29 +37,15 @@ export default function App() {
   const [loadErr, setLoadErr] = useState('')
   const show = (t: Toast, ms: number) => { setToast(t); setTimeout(() => setToast(null), ms) }
 
-  const resetSession = useCallback(() => { clearData(); setSession(null); setLoadErr(''); setBell(false); setToast(null) }, [])
+  const logout = useCallback(() => { clearData(); setSession(null); setLoadErr(''); setBell(false) }, [])
   const cargar = useCallback((rol: string) => {
     setLoading(true); setLoadErr('')
     loadAll(rol).catch((e: Error) => setLoadErr(e.message)).finally(() => setLoading(false))
   }, [])
   useEffect(() => {
-    setUnauthorizedHandler(() => { resetSession(); setErr('La sesión expiró. Inicie sesión nuevamente.') })
+    setUnauthorizedHandler(() => { logout(); setErr('La sesión expiró. Inicie sesión nuevamente.') })
     return () => setUnauthorizedHandler(null)
-  }, [resetSession])
-
-  useEffect(() => {
-    let active = true
-    getSession().then((u) => {
-      if (active && u) { setSession(u as Session); setPage(allowedPages(u.ROL)[0]); cargar(u.ROL) }
-    }).catch((e: Error) => { if (active) setErr(e.message) }).finally(() => { if (active) setChecking(false) })
-    return () => { active = false }
-  }, [cargar])
-  const logout = async () => {
-    setBusy(true)
-    try { await spLogout(); resetSession(); setErr('') }
-    catch (e) { if (e instanceof ApiError && e.status === 401) resetSession(); else show({ kind: 'err', text: 'No se pudo cerrar la sesión: ' + (e as Error).message, notes: [] }, 7000) }
-    finally { setBusy(false) }
-  }
+  }, [logout])
 
   // Ejecuta una operación contra Flask/Oracle bloqueando la interfaz mientras dura
   const act = async (ok: string, fn: () => Promise<string[]>): Promise<boolean> => {
@@ -78,7 +63,6 @@ export default function App() {
   }
   const pendientes = db.ALERTA.filter((a) => a.ATENDIDA === 'N').sort((a, b) => b.ID_ALERTA - a.ID_ALERTA)
 
-  if (checking) return <div className="flex min-h-screen items-center justify-center bg-primary text-white">Comprobando sesión...</div>
   if (!session)
     return (
       <div className="flex min-h-screen items-center justify-center bg-primary p-6">
@@ -97,7 +81,7 @@ export default function App() {
             <h1 className="text-xl font-bold tracking-wide text-primary">SERCOBELT</h1>
             <p className="text-sm text-slate-500">Gestión y control de bodega</p>
           </div>
-          <Field label="USERNAME"><input name="u" required maxLength={30} className={inputCls} placeholder="Usuario" autoFocus /></Field>
+          <Field label="USERNAME"><input name="u" required maxLength={30} className={inputCls} placeholder="mfuentes" autoFocus /></Field>
           <Field label="Contraseña"><input name="p" required type="password" className={inputCls} placeholder="••••••••" /></Field>
           {err && <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">{err}</p>}
           <button disabled={busy} className={`${btnPrimary} w-full justify-center disabled:opacity-60`}>{busy ? 'Ingresando...' : 'Ingresar'}</button>

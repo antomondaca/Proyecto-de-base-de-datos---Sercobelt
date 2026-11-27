@@ -16,7 +16,7 @@ export default function Retorno() {
   const dets = db.CHECKLIST_DETALLE.filter((d) => d.ID_OT === ot.ID_OT)
   const val = (d: any) => ret[d.ID_DETALLE] ?? String(d.CANTIDAD_RETORNADA ?? 0)
   const pend = dets.filter((d) => !['Retornado', 'Consumido'].includes(d.ESTADO_ITEM))
-  const faltantes = dets.filter((d) => fnNoRetornado(db, d) > 0).length
+  const faltantes = dets.filter((d) => fnNoRetornado(db, d, Number(val(d))) > 0).length
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -25,16 +25,16 @@ export default function Retorno() {
           <span className="text-sm text-slate-600">Retorno previsto: {fmt(ot.FECHA_RETORNO_PREVISTA)}</span>
           <Badge estado={ot.ESTADO} />
         </div>
-        <span className={`rounded-md px-3 py-1 text-sm font-medium ${faltantes ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}`}>{faltantes ? `${faltantes} ítem(s) con diferencia registrada` : 'Sin diferencias registradas'}</span>
+        <span className={`rounded-md px-3 py-1 text-sm font-medium ${faltantes ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}`}>{faltantes ? `${faltantes} ítem(s) con diferencia` : 'Sin diferencias'}</span>
       </div>
       <section className={`${card} overflow-x-auto`}>
         <table className="w-full text-sm">
-          <thead className="bg-slate-50"><tr><th className={th}>ITEM</th><th className={th}>ID_UNIDAD (CODIGO)</th><th className={th}>CANTIDAD_DESPACHADA</th><th className={th}>CANTIDAD_RETORNADA</th><th className={th}>DIFERENCIA REGISTRADA (FN_NO_RETORNADO)</th><th className={th}>OBSERVACION</th><th className={th}>ESTADO_ITEM</th></tr></thead>
+          <thead className="bg-slate-50"><tr><th className={th}>ITEM</th><th className={th}>ID_UNIDAD (CODIGO)</th><th className={th}>CANTIDAD_DESPACHADA</th><th className={th}>CANTIDAD_RETORNADA</th><th className={th}>DIFERENCIA (FN_NO_RETORNADO)</th><th className={th}>OBSERVACION</th><th className={th}>ESTADO_ITEM</th></tr></thead>
           <tbody>
             {dets.map((d) => {
               const it = db.ITEM.find((i) => i.ID_ITEM === d.ID_ITEM)!
               const retornable = itemEsRetornable(db, d)
-              const dif = fnNoRetornado(db, d)
+              const dif = fnNoRetornado(db, d, Number(val(d)))
               const cerrado = ['Retornado', 'Consumido'].includes(d.ESTADO_ITEM)
               return (
                 <tr key={d.ID_DETALLE} className={`border-t border-slate-100 ${dif > 0 ? 'bg-red-50' : ''}`}>

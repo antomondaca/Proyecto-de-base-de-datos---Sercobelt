@@ -248,6 +248,22 @@ BEGIN
     INSERT INTO ROLES (ID_ROL, NOMBRE_ROL)
     VALUES (SEQ_ROL.NEXTVAL, p_nombre_rol);
     COMMIT;
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+        IF SQLCODE BETWEEN -20999 AND -20000 THEN
+            RAISE;
+        ELSIF SQLCODE = -1 THEN
+            RAISE_APPLICATION_ERROR(-20010, 'Registro duplicado (INSERTAR_ROL).', TRUE);
+        ELSIF SQLCODE = -2292 THEN
+            RAISE_APPLICATION_ERROR(-20011, 'No se puede eliminar o modificar: existen registros asociados.', TRUE);
+        ELSIF SQLCODE = -2291 THEN
+            RAISE_APPLICATION_ERROR(-20012, 'La referencia seleccionada no existe.', TRUE);
+        ELSIF SQLCODE = 100 THEN
+            RAISE_APPLICATION_ERROR(-20013, 'Registro no encontrado (INSERTAR_ROL).', TRUE);
+        ELSE
+            RAISE_APPLICATION_ERROR(-20014, SUBSTR('Error en INSERTAR_ROL: ' || SQLERRM, 1, 500), TRUE);
+        END IF;
 END;
 
 
@@ -261,6 +277,22 @@ BEGIN
     SET NOMBRE_ROL = p_nombre_rol
     WHERE ID_ROL = p_id_rol;
     COMMIT;
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+        IF SQLCODE BETWEEN -20999 AND -20000 THEN
+            RAISE;
+        ELSIF SQLCODE = -1 THEN
+            RAISE_APPLICATION_ERROR(-20010, 'Registro duplicado (ACTUALIZAR_ROL).', TRUE);
+        ELSIF SQLCODE = -2292 THEN
+            RAISE_APPLICATION_ERROR(-20011, 'No se puede eliminar o modificar: existen registros asociados.', TRUE);
+        ELSIF SQLCODE = -2291 THEN
+            RAISE_APPLICATION_ERROR(-20012, 'La referencia seleccionada no existe.', TRUE);
+        ELSIF SQLCODE = 100 THEN
+            RAISE_APPLICATION_ERROR(-20013, 'Registro no encontrado (ACTUALIZAR_ROL).', TRUE);
+        ELSE
+            RAISE_APPLICATION_ERROR(-20014, SUBSTR('Error en ACTUALIZAR_ROL: ' || SQLERRM, 1, 500), TRUE);
+        END IF;
 END;
 
 
@@ -272,6 +304,22 @@ BEGIN
     DELETE FROM ROLES
     WHERE ID_ROL = p_id_rol;
     COMMIT;
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+        IF SQLCODE BETWEEN -20999 AND -20000 THEN
+            RAISE;
+        ELSIF SQLCODE = -1 THEN
+            RAISE_APPLICATION_ERROR(-20010, 'Registro duplicado (ELIMINAR_ROL).', TRUE);
+        ELSIF SQLCODE = -2292 THEN
+            RAISE_APPLICATION_ERROR(-20011, 'No se puede eliminar o modificar: existen registros asociados.', TRUE);
+        ELSIF SQLCODE = -2291 THEN
+            RAISE_APPLICATION_ERROR(-20012, 'La referencia seleccionada no existe.', TRUE);
+        ELSIF SQLCODE = 100 THEN
+            RAISE_APPLICATION_ERROR(-20013, 'Registro no encontrado (ELIMINAR_ROL).', TRUE);
+        ELSE
+            RAISE_APPLICATION_ERROR(-20014, SUBSTR('Error en ELIMINAR_ROL: ' || SQLERRM, 1, 500), TRUE);
+        END IF;
 END;
 
 
@@ -284,6 +332,21 @@ BEGIN
         SELECT ID_ROL, NOMBRE_ROL
         FROM ROLES
         ORDER BY ID_ROL;
+EXCEPTION
+    WHEN OTHERS THEN
+        IF SQLCODE BETWEEN -20999 AND -20000 THEN
+            RAISE;
+        ELSIF SQLCODE = -1 THEN
+            RAISE_APPLICATION_ERROR(-20010, 'Registro duplicado (LISTAR_ROL).', TRUE);
+        ELSIF SQLCODE = -2292 THEN
+            RAISE_APPLICATION_ERROR(-20011, 'No se puede eliminar o modificar: existen registros asociados.', TRUE);
+        ELSIF SQLCODE = -2291 THEN
+            RAISE_APPLICATION_ERROR(-20012, 'La referencia seleccionada no existe.', TRUE);
+        ELSIF SQLCODE = 100 THEN
+            RAISE_APPLICATION_ERROR(-20013, 'Registro no encontrado (LISTAR_ROL).', TRUE);
+        ELSE
+            RAISE_APPLICATION_ERROR(-20014, SUBSTR('Error en LISTAR_ROL: ' || SQLERRM, 1, 500), TRUE);
+        END IF;
 END;
 
 
@@ -303,6 +366,22 @@ BEGIN
     INSERT INTO PERSONALES (ID_PERSONAL, RUT, NOMBRE, CARGO, ESTADO)
     VALUES (SEQ_PERSONAL.NEXTVAL, p_rut, p_nombre, p_cargo, p_estado);
     COMMIT;
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+        IF SQLCODE BETWEEN -20999 AND -20000 THEN
+            RAISE;
+        ELSIF SQLCODE = -1 THEN
+            RAISE_APPLICATION_ERROR(-20010, 'Registro duplicado (INSERTAR_PERSONAL).', TRUE);
+        ELSIF SQLCODE = -2292 THEN
+            RAISE_APPLICATION_ERROR(-20011, 'No se puede eliminar o modificar: existen registros asociados.', TRUE);
+        ELSIF SQLCODE = -2291 THEN
+            RAISE_APPLICATION_ERROR(-20012, 'La referencia seleccionada no existe.', TRUE);
+        ELSIF SQLCODE = 100 THEN
+            RAISE_APPLICATION_ERROR(-20013, 'Registro no encontrado (INSERTAR_PERSONAL).', TRUE);
+        ELSE
+            RAISE_APPLICATION_ERROR(-20014, SUBSTR('Error en INSERTAR_PERSONAL: ' || SQLERRM, 1, 500), TRUE);
+        END IF;
 END;
 
 
@@ -322,6 +401,22 @@ BEGIN
         ESTADO = p_estado
     WHERE ID_PERSONAL = p_id_personal;
     COMMIT;
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+        IF SQLCODE BETWEEN -20999 AND -20000 THEN
+            RAISE;
+        ELSIF SQLCODE = -1 THEN
+            RAISE_APPLICATION_ERROR(-20010, 'Registro duplicado (ACTUALIZAR_PERSONAL).', TRUE);
+        ELSIF SQLCODE = -2292 THEN
+            RAISE_APPLICATION_ERROR(-20011, 'No se puede eliminar o modificar: existen registros asociados.', TRUE);
+        ELSIF SQLCODE = -2291 THEN
+            RAISE_APPLICATION_ERROR(-20012, 'La referencia seleccionada no existe.', TRUE);
+        ELSIF SQLCODE = 100 THEN
+            RAISE_APPLICATION_ERROR(-20013, 'Registro no encontrado (ACTUALIZAR_PERSONAL).', TRUE);
+        ELSE
+            RAISE_APPLICATION_ERROR(-20014, SUBSTR('Error en ACTUALIZAR_PERSONAL: ' || SQLERRM, 1, 500), TRUE);
+        END IF;
 END;
 
 
@@ -333,6 +428,22 @@ BEGIN
     DELETE FROM PERSONALES
     WHERE ID_PERSONAL = p_id_personal;
     COMMIT;
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+        IF SQLCODE BETWEEN -20999 AND -20000 THEN
+            RAISE;
+        ELSIF SQLCODE = -1 THEN
+            RAISE_APPLICATION_ERROR(-20010, 'Registro duplicado (ELIMINAR_PERSONAL).', TRUE);
+        ELSIF SQLCODE = -2292 THEN
+            RAISE_APPLICATION_ERROR(-20011, 'No se puede eliminar o modificar: existen registros asociados.', TRUE);
+        ELSIF SQLCODE = -2291 THEN
+            RAISE_APPLICATION_ERROR(-20012, 'La referencia seleccionada no existe.', TRUE);
+        ELSIF SQLCODE = 100 THEN
+            RAISE_APPLICATION_ERROR(-20013, 'Registro no encontrado (ELIMINAR_PERSONAL).', TRUE);
+        ELSE
+            RAISE_APPLICATION_ERROR(-20014, SUBSTR('Error en ELIMINAR_PERSONAL: ' || SQLERRM, 1, 500), TRUE);
+        END IF;
 END;
 
 
@@ -346,6 +457,21 @@ BEGIN
                CASE ESTADO WHEN 'A' THEN 'Activo' ELSE 'Inactivo' END AS ESTADO
         FROM PERSONALES
         ORDER BY ID_PERSONAL;
+EXCEPTION
+    WHEN OTHERS THEN
+        IF SQLCODE BETWEEN -20999 AND -20000 THEN
+            RAISE;
+        ELSIF SQLCODE = -1 THEN
+            RAISE_APPLICATION_ERROR(-20010, 'Registro duplicado (LISTAR_PERSONAL).', TRUE);
+        ELSIF SQLCODE = -2292 THEN
+            RAISE_APPLICATION_ERROR(-20011, 'No se puede eliminar o modificar: existen registros asociados.', TRUE);
+        ELSIF SQLCODE = -2291 THEN
+            RAISE_APPLICATION_ERROR(-20012, 'La referencia seleccionada no existe.', TRUE);
+        ELSIF SQLCODE = 100 THEN
+            RAISE_APPLICATION_ERROR(-20013, 'Registro no encontrado (LISTAR_PERSONAL).', TRUE);
+        ELSE
+            RAISE_APPLICATION_ERROR(-20014, SUBSTR('Error en LISTAR_PERSONAL: ' || SQLERRM, 1, 500), TRUE);
+        END IF;
 END;
 
 
@@ -367,6 +493,22 @@ BEGIN
     INSERT INTO CLIENTES (ID_CLIENTE, RUT, RAZON_SOCIAL, CONTACTO, EMAIL, TELEFONO)
     VALUES (SEQ_CLIENTE.NEXTVAL, p_rut, p_razon_social, p_contacto, p_email, p_telefono);
     COMMIT;
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+        IF SQLCODE BETWEEN -20999 AND -20000 THEN
+            RAISE;
+        ELSIF SQLCODE = -1 THEN
+            RAISE_APPLICATION_ERROR(-20010, 'Registro duplicado (INSERTAR_CLIENTE).', TRUE);
+        ELSIF SQLCODE = -2292 THEN
+            RAISE_APPLICATION_ERROR(-20011, 'No se puede eliminar o modificar: existen registros asociados.', TRUE);
+        ELSIF SQLCODE = -2291 THEN
+            RAISE_APPLICATION_ERROR(-20012, 'La referencia seleccionada no existe.', TRUE);
+        ELSIF SQLCODE = 100 THEN
+            RAISE_APPLICATION_ERROR(-20013, 'Registro no encontrado (INSERTAR_CLIENTE).', TRUE);
+        ELSE
+            RAISE_APPLICATION_ERROR(-20014, SUBSTR('Error en INSERTAR_CLIENTE: ' || SQLERRM, 1, 500), TRUE);
+        END IF;
 END;
 
 
@@ -388,6 +530,22 @@ BEGIN
         TELEFONO = p_telefono
     WHERE ID_CLIENTE = p_id_cliente;
     COMMIT;
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+        IF SQLCODE BETWEEN -20999 AND -20000 THEN
+            RAISE;
+        ELSIF SQLCODE = -1 THEN
+            RAISE_APPLICATION_ERROR(-20010, 'Registro duplicado (ACTUALIZAR_CLIENTE).', TRUE);
+        ELSIF SQLCODE = -2292 THEN
+            RAISE_APPLICATION_ERROR(-20011, 'No se puede eliminar o modificar: existen registros asociados.', TRUE);
+        ELSIF SQLCODE = -2291 THEN
+            RAISE_APPLICATION_ERROR(-20012, 'La referencia seleccionada no existe.', TRUE);
+        ELSIF SQLCODE = 100 THEN
+            RAISE_APPLICATION_ERROR(-20013, 'Registro no encontrado (ACTUALIZAR_CLIENTE).', TRUE);
+        ELSE
+            RAISE_APPLICATION_ERROR(-20014, SUBSTR('Error en ACTUALIZAR_CLIENTE: ' || SQLERRM, 1, 500), TRUE);
+        END IF;
 END;
 
 
@@ -399,6 +557,22 @@ BEGIN
     DELETE FROM CLIENTES
     WHERE ID_CLIENTE = p_id_cliente;
     COMMIT;
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+        IF SQLCODE BETWEEN -20999 AND -20000 THEN
+            RAISE;
+        ELSIF SQLCODE = -1 THEN
+            RAISE_APPLICATION_ERROR(-20010, 'Registro duplicado (ELIMINAR_CLIENTE).', TRUE);
+        ELSIF SQLCODE = -2292 THEN
+            RAISE_APPLICATION_ERROR(-20011, 'No se puede eliminar o modificar: existen registros asociados.', TRUE);
+        ELSIF SQLCODE = -2291 THEN
+            RAISE_APPLICATION_ERROR(-20012, 'La referencia seleccionada no existe.', TRUE);
+        ELSIF SQLCODE = 100 THEN
+            RAISE_APPLICATION_ERROR(-20013, 'Registro no encontrado (ELIMINAR_CLIENTE).', TRUE);
+        ELSE
+            RAISE_APPLICATION_ERROR(-20014, SUBSTR('Error en ELIMINAR_CLIENTE: ' || SQLERRM, 1, 500), TRUE);
+        END IF;
 END;
 
 
@@ -411,6 +585,21 @@ BEGIN
         SELECT ID_CLIENTE, RUT, RAZON_SOCIAL, CONTACTO, EMAIL, TELEFONO
         FROM CLIENTES
         ORDER BY ID_CLIENTE;
+EXCEPTION
+    WHEN OTHERS THEN
+        IF SQLCODE BETWEEN -20999 AND -20000 THEN
+            RAISE;
+        ELSIF SQLCODE = -1 THEN
+            RAISE_APPLICATION_ERROR(-20010, 'Registro duplicado (LISTAR_CLIENTE).', TRUE);
+        ELSIF SQLCODE = -2292 THEN
+            RAISE_APPLICATION_ERROR(-20011, 'No se puede eliminar o modificar: existen registros asociados.', TRUE);
+        ELSIF SQLCODE = -2291 THEN
+            RAISE_APPLICATION_ERROR(-20012, 'La referencia seleccionada no existe.', TRUE);
+        ELSIF SQLCODE = 100 THEN
+            RAISE_APPLICATION_ERROR(-20013, 'Registro no encontrado (LISTAR_CLIENTE).', TRUE);
+        ELSE
+            RAISE_APPLICATION_ERROR(-20014, SUBSTR('Error en LISTAR_CLIENTE: ' || SQLERRM, 1, 500), TRUE);
+        END IF;
 END;
 
 
@@ -431,6 +620,22 @@ BEGIN
     INSERT INTO PROVEEDORES (ID_PROVEEDOR, RUT, RAZON_SOCIAL, CONTACTO, TELEFONO)
     VALUES (SEQ_PROVEEDOR.NEXTVAL, p_rut, p_razon_social, p_contacto, p_telefono);
     COMMIT;
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+        IF SQLCODE BETWEEN -20999 AND -20000 THEN
+            RAISE;
+        ELSIF SQLCODE = -1 THEN
+            RAISE_APPLICATION_ERROR(-20010, 'Registro duplicado (INSERTAR_PROVEEDOR).', TRUE);
+        ELSIF SQLCODE = -2292 THEN
+            RAISE_APPLICATION_ERROR(-20011, 'No se puede eliminar o modificar: existen registros asociados.', TRUE);
+        ELSIF SQLCODE = -2291 THEN
+            RAISE_APPLICATION_ERROR(-20012, 'La referencia seleccionada no existe.', TRUE);
+        ELSIF SQLCODE = 100 THEN
+            RAISE_APPLICATION_ERROR(-20013, 'Registro no encontrado (INSERTAR_PROVEEDOR).', TRUE);
+        ELSE
+            RAISE_APPLICATION_ERROR(-20014, SUBSTR('Error en INSERTAR_PROVEEDOR: ' || SQLERRM, 1, 500), TRUE);
+        END IF;
 END;
 
 
@@ -450,6 +655,22 @@ BEGIN
         TELEFONO = p_telefono
     WHERE ID_PROVEEDOR = p_id_proveedor;
     COMMIT;
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+        IF SQLCODE BETWEEN -20999 AND -20000 THEN
+            RAISE;
+        ELSIF SQLCODE = -1 THEN
+            RAISE_APPLICATION_ERROR(-20010, 'Registro duplicado (ACTUALIZAR_PROVEEDOR).', TRUE);
+        ELSIF SQLCODE = -2292 THEN
+            RAISE_APPLICATION_ERROR(-20011, 'No se puede eliminar o modificar: existen registros asociados.', TRUE);
+        ELSIF SQLCODE = -2291 THEN
+            RAISE_APPLICATION_ERROR(-20012, 'La referencia seleccionada no existe.', TRUE);
+        ELSIF SQLCODE = 100 THEN
+            RAISE_APPLICATION_ERROR(-20013, 'Registro no encontrado (ACTUALIZAR_PROVEEDOR).', TRUE);
+        ELSE
+            RAISE_APPLICATION_ERROR(-20014, SUBSTR('Error en ACTUALIZAR_PROVEEDOR: ' || SQLERRM, 1, 500), TRUE);
+        END IF;
 END;
 
 
@@ -461,6 +682,22 @@ BEGIN
     DELETE FROM PROVEEDORES
     WHERE ID_PROVEEDOR = p_id_proveedor;
     COMMIT;
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+        IF SQLCODE BETWEEN -20999 AND -20000 THEN
+            RAISE;
+        ELSIF SQLCODE = -1 THEN
+            RAISE_APPLICATION_ERROR(-20010, 'Registro duplicado (ELIMINAR_PROVEEDOR).', TRUE);
+        ELSIF SQLCODE = -2292 THEN
+            RAISE_APPLICATION_ERROR(-20011, 'No se puede eliminar o modificar: existen registros asociados.', TRUE);
+        ELSIF SQLCODE = -2291 THEN
+            RAISE_APPLICATION_ERROR(-20012, 'La referencia seleccionada no existe.', TRUE);
+        ELSIF SQLCODE = 100 THEN
+            RAISE_APPLICATION_ERROR(-20013, 'Registro no encontrado (ELIMINAR_PROVEEDOR).', TRUE);
+        ELSE
+            RAISE_APPLICATION_ERROR(-20014, SUBSTR('Error en ELIMINAR_PROVEEDOR: ' || SQLERRM, 1, 500), TRUE);
+        END IF;
 END;
 
 
@@ -473,6 +710,21 @@ BEGIN
         SELECT ID_PROVEEDOR, RUT, RAZON_SOCIAL, CONTACTO, TELEFONO
         FROM PROVEEDORES
         ORDER BY ID_PROVEEDOR;
+EXCEPTION
+    WHEN OTHERS THEN
+        IF SQLCODE BETWEEN -20999 AND -20000 THEN
+            RAISE;
+        ELSIF SQLCODE = -1 THEN
+            RAISE_APPLICATION_ERROR(-20010, 'Registro duplicado (LISTAR_PROVEEDOR).', TRUE);
+        ELSIF SQLCODE = -2292 THEN
+            RAISE_APPLICATION_ERROR(-20011, 'No se puede eliminar o modificar: existen registros asociados.', TRUE);
+        ELSIF SQLCODE = -2291 THEN
+            RAISE_APPLICATION_ERROR(-20012, 'La referencia seleccionada no existe.', TRUE);
+        ELSIF SQLCODE = 100 THEN
+            RAISE_APPLICATION_ERROR(-20013, 'Registro no encontrado (LISTAR_PROVEEDOR).', TRUE);
+        ELSE
+            RAISE_APPLICATION_ERROR(-20014, SUBSTR('Error en LISTAR_PROVEEDOR: ' || SQLERRM, 1, 500), TRUE);
+        END IF;
 END;
 
 
@@ -492,6 +744,22 @@ BEGIN
     INSERT INTO VEHICULOS (ID_VEHICULO, PATENTE, TIPO, ESTADO)
     VALUES (SEQ_VEHICULO.NEXTVAL, p_patente, p_tipo, p_estado);
     COMMIT;
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+        IF SQLCODE BETWEEN -20999 AND -20000 THEN
+            RAISE;
+        ELSIF SQLCODE = -1 THEN
+            RAISE_APPLICATION_ERROR(-20010, 'Registro duplicado (INSERTAR_VEHICULO).', TRUE);
+        ELSIF SQLCODE = -2292 THEN
+            RAISE_APPLICATION_ERROR(-20011, 'No se puede eliminar o modificar: existen registros asociados.', TRUE);
+        ELSIF SQLCODE = -2291 THEN
+            RAISE_APPLICATION_ERROR(-20012, 'La referencia seleccionada no existe.', TRUE);
+        ELSIF SQLCODE = 100 THEN
+            RAISE_APPLICATION_ERROR(-20013, 'Registro no encontrado (INSERTAR_VEHICULO).', TRUE);
+        ELSE
+            RAISE_APPLICATION_ERROR(-20014, SUBSTR('Error en INSERTAR_VEHICULO: ' || SQLERRM, 1, 500), TRUE);
+        END IF;
 END;
 
 
@@ -509,6 +777,22 @@ BEGIN
         ESTADO = p_estado
     WHERE ID_VEHICULO = p_id_vehiculo;
     COMMIT;
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+        IF SQLCODE BETWEEN -20999 AND -20000 THEN
+            RAISE;
+        ELSIF SQLCODE = -1 THEN
+            RAISE_APPLICATION_ERROR(-20010, 'Registro duplicado (ACTUALIZAR_VEHICULO).', TRUE);
+        ELSIF SQLCODE = -2292 THEN
+            RAISE_APPLICATION_ERROR(-20011, 'No se puede eliminar o modificar: existen registros asociados.', TRUE);
+        ELSIF SQLCODE = -2291 THEN
+            RAISE_APPLICATION_ERROR(-20012, 'La referencia seleccionada no existe.', TRUE);
+        ELSIF SQLCODE = 100 THEN
+            RAISE_APPLICATION_ERROR(-20013, 'Registro no encontrado (ACTUALIZAR_VEHICULO).', TRUE);
+        ELSE
+            RAISE_APPLICATION_ERROR(-20014, SUBSTR('Error en ACTUALIZAR_VEHICULO: ' || SQLERRM, 1, 500), TRUE);
+        END IF;
 END;
 
 
@@ -520,6 +804,22 @@ BEGIN
     DELETE FROM VEHICULOS
     WHERE ID_VEHICULO = p_id_vehiculo;
     COMMIT;
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+        IF SQLCODE BETWEEN -20999 AND -20000 THEN
+            RAISE;
+        ELSIF SQLCODE = -1 THEN
+            RAISE_APPLICATION_ERROR(-20010, 'Registro duplicado (ELIMINAR_VEHICULO).', TRUE);
+        ELSIF SQLCODE = -2292 THEN
+            RAISE_APPLICATION_ERROR(-20011, 'No se puede eliminar o modificar: existen registros asociados.', TRUE);
+        ELSIF SQLCODE = -2291 THEN
+            RAISE_APPLICATION_ERROR(-20012, 'La referencia seleccionada no existe.', TRUE);
+        ELSIF SQLCODE = 100 THEN
+            RAISE_APPLICATION_ERROR(-20013, 'Registro no encontrado (ELIMINAR_VEHICULO).', TRUE);
+        ELSE
+            RAISE_APPLICATION_ERROR(-20014, SUBSTR('Error en ELIMINAR_VEHICULO: ' || SQLERRM, 1, 500), TRUE);
+        END IF;
 END;
 
 
@@ -533,6 +833,21 @@ BEGIN
                CASE ESTADO WHEN 'A' THEN 'Activo' ELSE 'Inactivo' END AS ESTADO
         FROM VEHICULOS
         ORDER BY ID_VEHICULO;
+EXCEPTION
+    WHEN OTHERS THEN
+        IF SQLCODE BETWEEN -20999 AND -20000 THEN
+            RAISE;
+        ELSIF SQLCODE = -1 THEN
+            RAISE_APPLICATION_ERROR(-20010, 'Registro duplicado (LISTAR_VEHICULO).', TRUE);
+        ELSIF SQLCODE = -2292 THEN
+            RAISE_APPLICATION_ERROR(-20011, 'No se puede eliminar o modificar: existen registros asociados.', TRUE);
+        ELSIF SQLCODE = -2291 THEN
+            RAISE_APPLICATION_ERROR(-20012, 'La referencia seleccionada no existe.', TRUE);
+        ELSIF SQLCODE = 100 THEN
+            RAISE_APPLICATION_ERROR(-20013, 'Registro no encontrado (LISTAR_VEHICULO).', TRUE);
+        ELSE
+            RAISE_APPLICATION_ERROR(-20014, SUBSTR('Error en LISTAR_VEHICULO: ' || SQLERRM, 1, 500), TRUE);
+        END IF;
 END;
 
 
@@ -551,6 +866,22 @@ BEGIN
     INSERT INTO TIPOS_TRABAJO (ID_TIPO_TRABAJO, NOMBRE, DESCRIPCION)
     VALUES (SEQ_TIPO_TRABAJO.NEXTVAL, p_nombre, p_descripcion);
     COMMIT;
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+        IF SQLCODE BETWEEN -20999 AND -20000 THEN
+            RAISE;
+        ELSIF SQLCODE = -1 THEN
+            RAISE_APPLICATION_ERROR(-20010, 'Registro duplicado (INSERTAR_TIPO_TRABAJO).', TRUE);
+        ELSIF SQLCODE = -2292 THEN
+            RAISE_APPLICATION_ERROR(-20011, 'No se puede eliminar o modificar: existen registros asociados.', TRUE);
+        ELSIF SQLCODE = -2291 THEN
+            RAISE_APPLICATION_ERROR(-20012, 'La referencia seleccionada no existe.', TRUE);
+        ELSIF SQLCODE = 100 THEN
+            RAISE_APPLICATION_ERROR(-20013, 'Registro no encontrado (INSERTAR_TIPO_TRABAJO).', TRUE);
+        ELSE
+            RAISE_APPLICATION_ERROR(-20014, SUBSTR('Error en INSERTAR_TIPO_TRABAJO: ' || SQLERRM, 1, 500), TRUE);
+        END IF;
 END;
 
 
@@ -566,6 +897,22 @@ BEGIN
         DESCRIPCION = p_descripcion
     WHERE ID_TIPO_TRABAJO = p_id_tipo_trabajo;
     COMMIT;
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+        IF SQLCODE BETWEEN -20999 AND -20000 THEN
+            RAISE;
+        ELSIF SQLCODE = -1 THEN
+            RAISE_APPLICATION_ERROR(-20010, 'Registro duplicado (ACTUALIZAR_TIPO_TRABAJO).', TRUE);
+        ELSIF SQLCODE = -2292 THEN
+            RAISE_APPLICATION_ERROR(-20011, 'No se puede eliminar o modificar: existen registros asociados.', TRUE);
+        ELSIF SQLCODE = -2291 THEN
+            RAISE_APPLICATION_ERROR(-20012, 'La referencia seleccionada no existe.', TRUE);
+        ELSIF SQLCODE = 100 THEN
+            RAISE_APPLICATION_ERROR(-20013, 'Registro no encontrado (ACTUALIZAR_TIPO_TRABAJO).', TRUE);
+        ELSE
+            RAISE_APPLICATION_ERROR(-20014, SUBSTR('Error en ACTUALIZAR_TIPO_TRABAJO: ' || SQLERRM, 1, 500), TRUE);
+        END IF;
 END;
 
 
@@ -577,6 +924,22 @@ BEGIN
     DELETE FROM TIPOS_TRABAJO
     WHERE ID_TIPO_TRABAJO = p_id_tipo_trabajo;
     COMMIT;
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+        IF SQLCODE BETWEEN -20999 AND -20000 THEN
+            RAISE;
+        ELSIF SQLCODE = -1 THEN
+            RAISE_APPLICATION_ERROR(-20010, 'Registro duplicado (ELIMINAR_TIPO_TRABAJO).', TRUE);
+        ELSIF SQLCODE = -2292 THEN
+            RAISE_APPLICATION_ERROR(-20011, 'No se puede eliminar o modificar: existen registros asociados.', TRUE);
+        ELSIF SQLCODE = -2291 THEN
+            RAISE_APPLICATION_ERROR(-20012, 'La referencia seleccionada no existe.', TRUE);
+        ELSIF SQLCODE = 100 THEN
+            RAISE_APPLICATION_ERROR(-20013, 'Registro no encontrado (ELIMINAR_TIPO_TRABAJO).', TRUE);
+        ELSE
+            RAISE_APPLICATION_ERROR(-20014, SUBSTR('Error en ELIMINAR_TIPO_TRABAJO: ' || SQLERRM, 1, 500), TRUE);
+        END IF;
 END;
 
 
@@ -589,6 +952,21 @@ BEGIN
         SELECT ID_TIPO_TRABAJO, NOMBRE, DESCRIPCION
         FROM TIPOS_TRABAJO
         ORDER BY ID_TIPO_TRABAJO;
+EXCEPTION
+    WHEN OTHERS THEN
+        IF SQLCODE BETWEEN -20999 AND -20000 THEN
+            RAISE;
+        ELSIF SQLCODE = -1 THEN
+            RAISE_APPLICATION_ERROR(-20010, 'Registro duplicado (LISTAR_TIPO_TRABAJO).', TRUE);
+        ELSIF SQLCODE = -2292 THEN
+            RAISE_APPLICATION_ERROR(-20011, 'No se puede eliminar o modificar: existen registros asociados.', TRUE);
+        ELSIF SQLCODE = -2291 THEN
+            RAISE_APPLICATION_ERROR(-20012, 'La referencia seleccionada no existe.', TRUE);
+        ELSIF SQLCODE = 100 THEN
+            RAISE_APPLICATION_ERROR(-20013, 'Registro no encontrado (LISTAR_TIPO_TRABAJO).', TRUE);
+        ELSE
+            RAISE_APPLICATION_ERROR(-20014, SUBSTR('Error en LISTAR_TIPO_TRABAJO: ' || SQLERRM, 1, 500), TRUE);
+        END IF;
 END;
 
 
@@ -607,6 +985,22 @@ BEGIN
     INSERT INTO CATEGORIAS_ITEMS (ID_CATEGORIA, NOMBRE, ES_RETORNABLE)
     VALUES (SEQ_CATEGORIA_ITEM.NEXTVAL, p_nombre, p_es_retornable);
     COMMIT;
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+        IF SQLCODE BETWEEN -20999 AND -20000 THEN
+            RAISE;
+        ELSIF SQLCODE = -1 THEN
+            RAISE_APPLICATION_ERROR(-20010, 'Registro duplicado (INSERTAR_CATEGORIA_ITEM).', TRUE);
+        ELSIF SQLCODE = -2292 THEN
+            RAISE_APPLICATION_ERROR(-20011, 'No se puede eliminar o modificar: existen registros asociados.', TRUE);
+        ELSIF SQLCODE = -2291 THEN
+            RAISE_APPLICATION_ERROR(-20012, 'La referencia seleccionada no existe.', TRUE);
+        ELSIF SQLCODE = 100 THEN
+            RAISE_APPLICATION_ERROR(-20013, 'Registro no encontrado (INSERTAR_CATEGORIA_ITEM).', TRUE);
+        ELSE
+            RAISE_APPLICATION_ERROR(-20014, SUBSTR('Error en INSERTAR_CATEGORIA_ITEM: ' || SQLERRM, 1, 500), TRUE);
+        END IF;
 END;
 
 
@@ -622,6 +1016,22 @@ BEGIN
         ES_RETORNABLE = p_es_retornable
     WHERE ID_CATEGORIA = p_id_categoria;
     COMMIT;
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+        IF SQLCODE BETWEEN -20999 AND -20000 THEN
+            RAISE;
+        ELSIF SQLCODE = -1 THEN
+            RAISE_APPLICATION_ERROR(-20010, 'Registro duplicado (ACTUALIZAR_CATEGORIA_ITEM).', TRUE);
+        ELSIF SQLCODE = -2292 THEN
+            RAISE_APPLICATION_ERROR(-20011, 'No se puede eliminar o modificar: existen registros asociados.', TRUE);
+        ELSIF SQLCODE = -2291 THEN
+            RAISE_APPLICATION_ERROR(-20012, 'La referencia seleccionada no existe.', TRUE);
+        ELSIF SQLCODE = 100 THEN
+            RAISE_APPLICATION_ERROR(-20013, 'Registro no encontrado (ACTUALIZAR_CATEGORIA_ITEM).', TRUE);
+        ELSE
+            RAISE_APPLICATION_ERROR(-20014, SUBSTR('Error en ACTUALIZAR_CATEGORIA_ITEM: ' || SQLERRM, 1, 500), TRUE);
+        END IF;
 END;
 
 
@@ -633,6 +1043,22 @@ BEGIN
     DELETE FROM CATEGORIAS_ITEMS
     WHERE ID_CATEGORIA = p_id_categoria;
     COMMIT;
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+        IF SQLCODE BETWEEN -20999 AND -20000 THEN
+            RAISE;
+        ELSIF SQLCODE = -1 THEN
+            RAISE_APPLICATION_ERROR(-20010, 'Registro duplicado (ELIMINAR_CATEGORIA_ITEM).', TRUE);
+        ELSIF SQLCODE = -2292 THEN
+            RAISE_APPLICATION_ERROR(-20011, 'No se puede eliminar o modificar: existen registros asociados.', TRUE);
+        ELSIF SQLCODE = -2291 THEN
+            RAISE_APPLICATION_ERROR(-20012, 'La referencia seleccionada no existe.', TRUE);
+        ELSIF SQLCODE = 100 THEN
+            RAISE_APPLICATION_ERROR(-20013, 'Registro no encontrado (ELIMINAR_CATEGORIA_ITEM).', TRUE);
+        ELSE
+            RAISE_APPLICATION_ERROR(-20014, SUBSTR('Error en ELIMINAR_CATEGORIA_ITEM: ' || SQLERRM, 1, 500), TRUE);
+        END IF;
 END;
 
 
@@ -646,6 +1072,21 @@ BEGIN
                CASE ES_RETORNABLE WHEN 'S' THEN 'Sí' ELSE 'No' END AS ES_RETORNABLE
         FROM CATEGORIAS_ITEMS
         ORDER BY ID_CATEGORIA;
+EXCEPTION
+    WHEN OTHERS THEN
+        IF SQLCODE BETWEEN -20999 AND -20000 THEN
+            RAISE;
+        ELSIF SQLCODE = -1 THEN
+            RAISE_APPLICATION_ERROR(-20010, 'Registro duplicado (LISTAR_CATEGORIA_ITEM).', TRUE);
+        ELSIF SQLCODE = -2292 THEN
+            RAISE_APPLICATION_ERROR(-20011, 'No se puede eliminar o modificar: existen registros asociados.', TRUE);
+        ELSIF SQLCODE = -2291 THEN
+            RAISE_APPLICATION_ERROR(-20012, 'La referencia seleccionada no existe.', TRUE);
+        ELSIF SQLCODE = 100 THEN
+            RAISE_APPLICATION_ERROR(-20013, 'Registro no encontrado (LISTAR_CATEGORIA_ITEM).', TRUE);
+        ELSE
+            RAISE_APPLICATION_ERROR(-20014, SUBSTR('Error en LISTAR_CATEGORIA_ITEM: ' || SQLERRM, 1, 500), TRUE);
+        END IF;
 END;
 
 
@@ -665,6 +1106,22 @@ BEGIN
     INSERT INTO FAENAS (ID_FAENA, ID_CLIENTE, NOMBRE, UBICACION)
     VALUES (SEQ_FAENA.NEXTVAL, p_id_cliente, p_nombre, p_ubicacion);
     COMMIT;
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+        IF SQLCODE BETWEEN -20999 AND -20000 THEN
+            RAISE;
+        ELSIF SQLCODE = -1 THEN
+            RAISE_APPLICATION_ERROR(-20010, 'Registro duplicado (INSERTAR_FAENA).', TRUE);
+        ELSIF SQLCODE = -2292 THEN
+            RAISE_APPLICATION_ERROR(-20011, 'No se puede eliminar o modificar: existen registros asociados.', TRUE);
+        ELSIF SQLCODE = -2291 THEN
+            RAISE_APPLICATION_ERROR(-20012, 'La referencia seleccionada no existe.', TRUE);
+        ELSIF SQLCODE = 100 THEN
+            RAISE_APPLICATION_ERROR(-20013, 'Registro no encontrado (INSERTAR_FAENA).', TRUE);
+        ELSE
+            RAISE_APPLICATION_ERROR(-20014, SUBSTR('Error en INSERTAR_FAENA: ' || SQLERRM, 1, 500), TRUE);
+        END IF;
 END;
 
 
@@ -682,6 +1139,22 @@ BEGIN
         UBICACION = p_ubicacion
     WHERE ID_FAENA = p_id_faena;
     COMMIT;
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+        IF SQLCODE BETWEEN -20999 AND -20000 THEN
+            RAISE;
+        ELSIF SQLCODE = -1 THEN
+            RAISE_APPLICATION_ERROR(-20010, 'Registro duplicado (ACTUALIZAR_FAENA).', TRUE);
+        ELSIF SQLCODE = -2292 THEN
+            RAISE_APPLICATION_ERROR(-20011, 'No se puede eliminar o modificar: existen registros asociados.', TRUE);
+        ELSIF SQLCODE = -2291 THEN
+            RAISE_APPLICATION_ERROR(-20012, 'La referencia seleccionada no existe.', TRUE);
+        ELSIF SQLCODE = 100 THEN
+            RAISE_APPLICATION_ERROR(-20013, 'Registro no encontrado (ACTUALIZAR_FAENA).', TRUE);
+        ELSE
+            RAISE_APPLICATION_ERROR(-20014, SUBSTR('Error en ACTUALIZAR_FAENA: ' || SQLERRM, 1, 500), TRUE);
+        END IF;
 END;
 
 
@@ -693,6 +1166,22 @@ BEGIN
     DELETE FROM FAENAS
     WHERE ID_FAENA = p_id_faena;
     COMMIT;
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+        IF SQLCODE BETWEEN -20999 AND -20000 THEN
+            RAISE;
+        ELSIF SQLCODE = -1 THEN
+            RAISE_APPLICATION_ERROR(-20010, 'Registro duplicado (ELIMINAR_FAENA).', TRUE);
+        ELSIF SQLCODE = -2292 THEN
+            RAISE_APPLICATION_ERROR(-20011, 'No se puede eliminar o modificar: existen registros asociados.', TRUE);
+        ELSIF SQLCODE = -2291 THEN
+            RAISE_APPLICATION_ERROR(-20012, 'La referencia seleccionada no existe.', TRUE);
+        ELSIF SQLCODE = 100 THEN
+            RAISE_APPLICATION_ERROR(-20013, 'Registro no encontrado (ELIMINAR_FAENA).', TRUE);
+        ELSE
+            RAISE_APPLICATION_ERROR(-20014, SUBSTR('Error en ELIMINAR_FAENA: ' || SQLERRM, 1, 500), TRUE);
+        END IF;
 END;
 
 
@@ -710,6 +1199,21 @@ BEGIN
         FROM FAENAS f
         JOIN CLIENTES c ON f.ID_CLIENTE = c.ID_CLIENTE
         ORDER BY f.ID_FAENA;
+EXCEPTION
+    WHEN OTHERS THEN
+        IF SQLCODE BETWEEN -20999 AND -20000 THEN
+            RAISE;
+        ELSIF SQLCODE = -1 THEN
+            RAISE_APPLICATION_ERROR(-20010, 'Registro duplicado (LISTAR_FAENA).', TRUE);
+        ELSIF SQLCODE = -2292 THEN
+            RAISE_APPLICATION_ERROR(-20011, 'No se puede eliminar o modificar: existen registros asociados.', TRUE);
+        ELSIF SQLCODE = -2291 THEN
+            RAISE_APPLICATION_ERROR(-20012, 'La referencia seleccionada no existe.', TRUE);
+        ELSIF SQLCODE = 100 THEN
+            RAISE_APPLICATION_ERROR(-20013, 'Registro no encontrado (LISTAR_FAENA).', TRUE);
+        ELSE
+            RAISE_APPLICATION_ERROR(-20014, SUBSTR('Error en LISTAR_FAENA: ' || SQLERRM, 1, 500), TRUE);
+        END IF;
 END;
 
 
@@ -731,6 +1235,22 @@ BEGIN
     INSERT INTO ITEMS (ID_ITEM, ID_CATEGORIA, NOMBRE, DIMENSION, UNIDAD, ES_IDENTIFICABLE)
     VALUES (SEQ_ITEM.NEXTVAL, p_id_categoria, p_nombre, p_dimension, p_unidad, p_es_identificable);
     COMMIT;
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+        IF SQLCODE BETWEEN -20999 AND -20000 THEN
+            RAISE;
+        ELSIF SQLCODE = -1 THEN
+            RAISE_APPLICATION_ERROR(-20010, 'Registro duplicado (INSERTAR_ITEM).', TRUE);
+        ELSIF SQLCODE = -2292 THEN
+            RAISE_APPLICATION_ERROR(-20011, 'No se puede eliminar o modificar: existen registros asociados.', TRUE);
+        ELSIF SQLCODE = -2291 THEN
+            RAISE_APPLICATION_ERROR(-20012, 'La referencia seleccionada no existe.', TRUE);
+        ELSIF SQLCODE = 100 THEN
+            RAISE_APPLICATION_ERROR(-20013, 'Registro no encontrado (INSERTAR_ITEM).', TRUE);
+        ELSE
+            RAISE_APPLICATION_ERROR(-20014, SUBSTR('Error en INSERTAR_ITEM: ' || SQLERRM, 1, 500), TRUE);
+        END IF;
 END;
 
 
@@ -752,6 +1272,22 @@ BEGIN
         ES_IDENTIFICABLE = p_es_identificable
     WHERE ID_ITEM = p_id_item;
     COMMIT;
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+        IF SQLCODE BETWEEN -20999 AND -20000 THEN
+            RAISE;
+        ELSIF SQLCODE = -1 THEN
+            RAISE_APPLICATION_ERROR(-20010, 'Registro duplicado (ACTUALIZAR_ITEM).', TRUE);
+        ELSIF SQLCODE = -2292 THEN
+            RAISE_APPLICATION_ERROR(-20011, 'No se puede eliminar o modificar: existen registros asociados.', TRUE);
+        ELSIF SQLCODE = -2291 THEN
+            RAISE_APPLICATION_ERROR(-20012, 'La referencia seleccionada no existe.', TRUE);
+        ELSIF SQLCODE = 100 THEN
+            RAISE_APPLICATION_ERROR(-20013, 'Registro no encontrado (ACTUALIZAR_ITEM).', TRUE);
+        ELSE
+            RAISE_APPLICATION_ERROR(-20014, SUBSTR('Error en ACTUALIZAR_ITEM: ' || SQLERRM, 1, 500), TRUE);
+        END IF;
 END;
 
 
@@ -763,6 +1299,22 @@ BEGIN
     DELETE FROM ITEMS
     WHERE ID_ITEM = p_id_item;
     COMMIT;
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+        IF SQLCODE BETWEEN -20999 AND -20000 THEN
+            RAISE;
+        ELSIF SQLCODE = -1 THEN
+            RAISE_APPLICATION_ERROR(-20010, 'Registro duplicado (ELIMINAR_ITEM).', TRUE);
+        ELSIF SQLCODE = -2292 THEN
+            RAISE_APPLICATION_ERROR(-20011, 'No se puede eliminar o modificar: existen registros asociados.', TRUE);
+        ELSIF SQLCODE = -2291 THEN
+            RAISE_APPLICATION_ERROR(-20012, 'La referencia seleccionada no existe.', TRUE);
+        ELSIF SQLCODE = 100 THEN
+            RAISE_APPLICATION_ERROR(-20013, 'Registro no encontrado (ELIMINAR_ITEM).', TRUE);
+        ELSE
+            RAISE_APPLICATION_ERROR(-20014, SUBSTR('Error en ELIMINAR_ITEM: ' || SQLERRM, 1, 500), TRUE);
+        END IF;
 END;
 
 
@@ -782,6 +1334,21 @@ BEGIN
         FROM ITEMS i
         JOIN CATEGORIAS_ITEMS c ON i.ID_CATEGORIA = c.ID_CATEGORIA
         ORDER BY i.ID_ITEM;
+EXCEPTION
+    WHEN OTHERS THEN
+        IF SQLCODE BETWEEN -20999 AND -20000 THEN
+            RAISE;
+        ELSIF SQLCODE = -1 THEN
+            RAISE_APPLICATION_ERROR(-20010, 'Registro duplicado (LISTAR_ITEM).', TRUE);
+        ELSIF SQLCODE = -2292 THEN
+            RAISE_APPLICATION_ERROR(-20011, 'No se puede eliminar o modificar: existen registros asociados.', TRUE);
+        ELSIF SQLCODE = -2291 THEN
+            RAISE_APPLICATION_ERROR(-20012, 'La referencia seleccionada no existe.', TRUE);
+        ELSIF SQLCODE = 100 THEN
+            RAISE_APPLICATION_ERROR(-20013, 'Registro no encontrado (LISTAR_ITEM).', TRUE);
+        ELSE
+            RAISE_APPLICATION_ERROR(-20014, SUBSTR('Error en LISTAR_ITEM: ' || SQLERRM, 1, 500), TRUE);
+        END IF;
 END;
 
 
@@ -803,6 +1370,22 @@ BEGIN
     INSERT INTO UNIDADES_EQUIPOS (ID_UNIDAD, ID_ITEM, CODIGO, NRO_SERIE, ESTADO, FECHA_PROXIMA_CALIBRACION)
     VALUES (SEQ_UNIDAD_EQUIPO.NEXTVAL, p_id_item, p_codigo, p_nro_serie, p_estado, p_fecha_proxima_calibracion);
     COMMIT;
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+        IF SQLCODE BETWEEN -20999 AND -20000 THEN
+            RAISE;
+        ELSIF SQLCODE = -1 THEN
+            RAISE_APPLICATION_ERROR(-20010, 'Registro duplicado (INSERTAR_UNIDAD_EQUIPO).', TRUE);
+        ELSIF SQLCODE = -2292 THEN
+            RAISE_APPLICATION_ERROR(-20011, 'No se puede eliminar o modificar: existen registros asociados.', TRUE);
+        ELSIF SQLCODE = -2291 THEN
+            RAISE_APPLICATION_ERROR(-20012, 'La referencia seleccionada no existe.', TRUE);
+        ELSIF SQLCODE = 100 THEN
+            RAISE_APPLICATION_ERROR(-20013, 'Registro no encontrado (INSERTAR_UNIDAD_EQUIPO).', TRUE);
+        ELSE
+            RAISE_APPLICATION_ERROR(-20014, SUBSTR('Error en INSERTAR_UNIDAD_EQUIPO: ' || SQLERRM, 1, 500), TRUE);
+        END IF;
 END;
 
 CREATE OR REPLACE PROCEDURE ACTUALIZAR_UNIDAD_EQUIPO (
@@ -823,6 +1406,22 @@ BEGIN
         FECHA_PROXIMA_CALIBRACION = p_fecha_proxima_calibracion
     WHERE ID_UNIDAD = p_id_unidad;
     COMMIT;
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+        IF SQLCODE BETWEEN -20999 AND -20000 THEN
+            RAISE;
+        ELSIF SQLCODE = -1 THEN
+            RAISE_APPLICATION_ERROR(-20010, 'Registro duplicado (ACTUALIZAR_UNIDAD_EQUIPO).', TRUE);
+        ELSIF SQLCODE = -2292 THEN
+            RAISE_APPLICATION_ERROR(-20011, 'No se puede eliminar o modificar: existen registros asociados.', TRUE);
+        ELSIF SQLCODE = -2291 THEN
+            RAISE_APPLICATION_ERROR(-20012, 'La referencia seleccionada no existe.', TRUE);
+        ELSIF SQLCODE = 100 THEN
+            RAISE_APPLICATION_ERROR(-20013, 'Registro no encontrado (ACTUALIZAR_UNIDAD_EQUIPO).', TRUE);
+        ELSE
+            RAISE_APPLICATION_ERROR(-20014, SUBSTR('Error en ACTUALIZAR_UNIDAD_EQUIPO: ' || SQLERRM, 1, 500), TRUE);
+        END IF;
 END;
 
 
@@ -834,6 +1433,22 @@ BEGIN
     DELETE FROM UNIDADES_EQUIPOS
     WHERE ID_UNIDAD = p_id_unidad;
     COMMIT;
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+        IF SQLCODE BETWEEN -20999 AND -20000 THEN
+            RAISE;
+        ELSIF SQLCODE = -1 THEN
+            RAISE_APPLICATION_ERROR(-20010, 'Registro duplicado (ELIMINAR_UNIDAD_EQUIPO).', TRUE);
+        ELSIF SQLCODE = -2292 THEN
+            RAISE_APPLICATION_ERROR(-20011, 'No se puede eliminar o modificar: existen registros asociados.', TRUE);
+        ELSIF SQLCODE = -2291 THEN
+            RAISE_APPLICATION_ERROR(-20012, 'La referencia seleccionada no existe.', TRUE);
+        ELSIF SQLCODE = 100 THEN
+            RAISE_APPLICATION_ERROR(-20013, 'Registro no encontrado (ELIMINAR_UNIDAD_EQUIPO).', TRUE);
+        ELSE
+            RAISE_APPLICATION_ERROR(-20014, SUBSTR('Error en ELIMINAR_UNIDAD_EQUIPO: ' || SQLERRM, 1, 500), TRUE);
+        END IF;
 END;
 
 
@@ -853,6 +1468,21 @@ BEGIN
         FROM UNIDADES_EQUIPOS u
         JOIN ITEMS i ON u.ID_ITEM = i.ID_ITEM
         ORDER BY u.ID_UNIDAD;
+EXCEPTION
+    WHEN OTHERS THEN
+        IF SQLCODE BETWEEN -20999 AND -20000 THEN
+            RAISE;
+        ELSIF SQLCODE = -1 THEN
+            RAISE_APPLICATION_ERROR(-20010, 'Registro duplicado (LISTAR_UNIDAD_EQUIPO).', TRUE);
+        ELSIF SQLCODE = -2292 THEN
+            RAISE_APPLICATION_ERROR(-20011, 'No se puede eliminar o modificar: existen registros asociados.', TRUE);
+        ELSIF SQLCODE = -2291 THEN
+            RAISE_APPLICATION_ERROR(-20012, 'La referencia seleccionada no existe.', TRUE);
+        ELSIF SQLCODE = 100 THEN
+            RAISE_APPLICATION_ERROR(-20013, 'Registro no encontrado (LISTAR_UNIDAD_EQUIPO).', TRUE);
+        ELSE
+            RAISE_APPLICATION_ERROR(-20014, SUBSTR('Error en LISTAR_UNIDAD_EQUIPO: ' || SQLERRM, 1, 500), TRUE);
+        END IF;
 END;
 
 
@@ -874,6 +1504,22 @@ BEGIN
     INSERT INTO USUARIOS (ID_USUARIO, ID_ROL, ID_PERSONAL, USERNAME, PASSWORD_HASH, ESTADO)
     VALUES (SEQ_USUARIO.NEXTVAL, p_id_rol, p_id_personal, p_username, p_password_hash, p_estado);
     COMMIT;
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+        IF SQLCODE BETWEEN -20999 AND -20000 THEN
+            RAISE;
+        ELSIF SQLCODE = -1 THEN
+            RAISE_APPLICATION_ERROR(-20010, 'Registro duplicado (INSERTAR_USUARIO).', TRUE);
+        ELSIF SQLCODE = -2292 THEN
+            RAISE_APPLICATION_ERROR(-20011, 'No se puede eliminar o modificar: existen registros asociados.', TRUE);
+        ELSIF SQLCODE = -2291 THEN
+            RAISE_APPLICATION_ERROR(-20012, 'La referencia seleccionada no existe.', TRUE);
+        ELSIF SQLCODE = 100 THEN
+            RAISE_APPLICATION_ERROR(-20013, 'Registro no encontrado (INSERTAR_USUARIO).', TRUE);
+        ELSE
+            RAISE_APPLICATION_ERROR(-20014, SUBSTR('Error en INSERTAR_USUARIO: ' || SQLERRM, 1, 500), TRUE);
+        END IF;
 END;
 
 
@@ -895,6 +1541,22 @@ BEGIN
         ESTADO = p_estado
     WHERE ID_USUARIO = p_id_usuario;
     COMMIT;
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+        IF SQLCODE BETWEEN -20999 AND -20000 THEN
+            RAISE;
+        ELSIF SQLCODE = -1 THEN
+            RAISE_APPLICATION_ERROR(-20010, 'Registro duplicado (ACTUALIZAR_USUARIO).', TRUE);
+        ELSIF SQLCODE = -2292 THEN
+            RAISE_APPLICATION_ERROR(-20011, 'No se puede eliminar o modificar: existen registros asociados.', TRUE);
+        ELSIF SQLCODE = -2291 THEN
+            RAISE_APPLICATION_ERROR(-20012, 'La referencia seleccionada no existe.', TRUE);
+        ELSIF SQLCODE = 100 THEN
+            RAISE_APPLICATION_ERROR(-20013, 'Registro no encontrado (ACTUALIZAR_USUARIO).', TRUE);
+        ELSE
+            RAISE_APPLICATION_ERROR(-20014, SUBSTR('Error en ACTUALIZAR_USUARIO: ' || SQLERRM, 1, 500), TRUE);
+        END IF;
 END;
 
 
@@ -906,6 +1568,22 @@ BEGIN
     DELETE FROM USUARIOS
     WHERE ID_USUARIO = p_id_usuario;
     COMMIT;
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+        IF SQLCODE BETWEEN -20999 AND -20000 THEN
+            RAISE;
+        ELSIF SQLCODE = -1 THEN
+            RAISE_APPLICATION_ERROR(-20010, 'Registro duplicado (ELIMINAR_USUARIO).', TRUE);
+        ELSIF SQLCODE = -2292 THEN
+            RAISE_APPLICATION_ERROR(-20011, 'No se puede eliminar o modificar: existen registros asociados.', TRUE);
+        ELSIF SQLCODE = -2291 THEN
+            RAISE_APPLICATION_ERROR(-20012, 'La referencia seleccionada no existe.', TRUE);
+        ELSIF SQLCODE = 100 THEN
+            RAISE_APPLICATION_ERROR(-20013, 'Registro no encontrado (ELIMINAR_USUARIO).', TRUE);
+        ELSE
+            RAISE_APPLICATION_ERROR(-20014, SUBSTR('Error en ELIMINAR_USUARIO: ' || SQLERRM, 1, 500), TRUE);
+        END IF;
 END;
 
 
@@ -926,6 +1604,21 @@ BEGIN
         JOIN ROLES r ON u.ID_ROL = r.ID_ROL
         LEFT JOIN PERSONALES p ON u.ID_PERSONAL = p.ID_PERSONAL
         ORDER BY u.ID_USUARIO;
+EXCEPTION
+    WHEN OTHERS THEN
+        IF SQLCODE BETWEEN -20999 AND -20000 THEN
+            RAISE;
+        ELSIF SQLCODE = -1 THEN
+            RAISE_APPLICATION_ERROR(-20010, 'Registro duplicado (LISTAR_USUARIO).', TRUE);
+        ELSIF SQLCODE = -2292 THEN
+            RAISE_APPLICATION_ERROR(-20011, 'No se puede eliminar o modificar: existen registros asociados.', TRUE);
+        ELSIF SQLCODE = -2291 THEN
+            RAISE_APPLICATION_ERROR(-20012, 'La referencia seleccionada no existe.', TRUE);
+        ELSIF SQLCODE = 100 THEN
+            RAISE_APPLICATION_ERROR(-20013, 'Registro no encontrado (LISTAR_USUARIO).', TRUE);
+        ELSE
+            RAISE_APPLICATION_ERROR(-20014, SUBSTR('Error en LISTAR_USUARIO: ' || SQLERRM, 1, 500), TRUE);
+        END IF;
 END;
 
 
@@ -980,6 +1673,21 @@ BEGIN
         WHERE u.USERNAME = p_username
           AND u.PASSWORD_HASH = p_password_hash
           AND u.ESTADO = 'A';
+EXCEPTION
+    WHEN OTHERS THEN
+        IF SQLCODE BETWEEN -20999 AND -20000 THEN
+            RAISE;
+        ELSIF SQLCODE = -1 THEN
+            RAISE_APPLICATION_ERROR(-20010, 'Registro duplicado (SP_LOGIN).', TRUE);
+        ELSIF SQLCODE = -2292 THEN
+            RAISE_APPLICATION_ERROR(-20011, 'No se puede eliminar o modificar: existen registros asociados.', TRUE);
+        ELSIF SQLCODE = -2291 THEN
+            RAISE_APPLICATION_ERROR(-20012, 'La referencia seleccionada no existe.', TRUE);
+        ELSIF SQLCODE = 100 THEN
+            RAISE_APPLICATION_ERROR(-20013, 'Registro no encontrado (SP_LOGIN).', TRUE);
+        ELSE
+            RAISE_APPLICATION_ERROR(-20014, SUBSTR('Error en SP_LOGIN: ' || SQLERRM, 1, 500), TRUE);
+        END IF;
 END;
 
 
@@ -995,6 +1703,21 @@ BEGIN
     WHERE ID_DETALLE = p_id_detalle;
 
     RETURN v_pendiente;
+EXCEPTION
+    WHEN OTHERS THEN
+        IF SQLCODE BETWEEN -20999 AND -20000 THEN
+            RAISE;
+        ELSIF SQLCODE = -1 THEN
+            RAISE_APPLICATION_ERROR(-20010, 'Registro duplicado (FN_POR_DESPACHAR).', TRUE);
+        ELSIF SQLCODE = -2292 THEN
+            RAISE_APPLICATION_ERROR(-20011, 'No se puede eliminar o modificar: existen registros asociados.', TRUE);
+        ELSIF SQLCODE = -2291 THEN
+            RAISE_APPLICATION_ERROR(-20012, 'La referencia seleccionada no existe.', TRUE);
+        ELSIF SQLCODE = 100 THEN
+            RAISE_APPLICATION_ERROR(-20013, 'Registro no encontrado (FN_POR_DESPACHAR).', TRUE);
+        ELSE
+            RAISE_APPLICATION_ERROR(-20014, SUBSTR('Error en FN_POR_DESPACHAR: ' || SQLERRM, 1, 500), TRUE);
+        END IF;
 END;
 
 
@@ -1017,6 +1740,21 @@ BEGIN
     ELSE
         RETURN 0;
     END IF;
+EXCEPTION
+    WHEN OTHERS THEN
+        IF SQLCODE BETWEEN -20999 AND -20000 THEN
+            RAISE;
+        ELSIF SQLCODE = -1 THEN
+            RAISE_APPLICATION_ERROR(-20010, 'Registro duplicado (FN_NO_RETORNADO).', TRUE);
+        ELSIF SQLCODE = -2292 THEN
+            RAISE_APPLICATION_ERROR(-20011, 'No se puede eliminar o modificar: existen registros asociados.', TRUE);
+        ELSIF SQLCODE = -2291 THEN
+            RAISE_APPLICATION_ERROR(-20012, 'La referencia seleccionada no existe.', TRUE);
+        ELSIF SQLCODE = 100 THEN
+            RAISE_APPLICATION_ERROR(-20013, 'Registro no encontrado (FN_NO_RETORNADO).', TRUE);
+        ELSE
+            RAISE_APPLICATION_ERROR(-20014, SUBSTR('Error en FN_NO_RETORNADO: ' || SQLERRM, 1, 500), TRUE);
+        END IF;
 END;
 
 
@@ -1067,6 +1805,23 @@ BEGIN
     CLOSE c_plantilla;
 
     COMMIT;
+EXCEPTION
+    WHEN OTHERS THEN
+        IF c_plantilla%ISOPEN THEN CLOSE c_plantilla; END IF;
+        ROLLBACK;
+        IF SQLCODE BETWEEN -20999 AND -20000 THEN
+            RAISE;
+        ELSIF SQLCODE = -1 THEN
+            RAISE_APPLICATION_ERROR(-20010, 'Registro duplicado (CREAR_OT_CON_CHECKLIST).', TRUE);
+        ELSIF SQLCODE = -2292 THEN
+            RAISE_APPLICATION_ERROR(-20011, 'No se puede eliminar o modificar: existen registros asociados.', TRUE);
+        ELSIF SQLCODE = -2291 THEN
+            RAISE_APPLICATION_ERROR(-20012, 'La referencia seleccionada no existe.', TRUE);
+        ELSIF SQLCODE = 100 THEN
+            RAISE_APPLICATION_ERROR(-20013, 'Registro no encontrado (CREAR_OT_CON_CHECKLIST).', TRUE);
+        ELSE
+            RAISE_APPLICATION_ERROR(-20014, SUBSTR('Error en CREAR_OT_CON_CHECKLIST: ' || SQLERRM, 1, 500), TRUE);
+        END IF;
 END;
 
 
@@ -1101,6 +1856,22 @@ BEGIN
     WHERE ID_DETALLE = p_id_detalle;
 
     COMMIT;
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+        IF SQLCODE BETWEEN -20999 AND -20000 THEN
+            RAISE;
+        ELSIF SQLCODE = -1 THEN
+            RAISE_APPLICATION_ERROR(-20010, 'Registro duplicado (VERIFICAR_DESPACHAR_ITEM).', TRUE);
+        ELSIF SQLCODE = -2292 THEN
+            RAISE_APPLICATION_ERROR(-20011, 'No se puede eliminar o modificar: existen registros asociados.', TRUE);
+        ELSIF SQLCODE = -2291 THEN
+            RAISE_APPLICATION_ERROR(-20012, 'La referencia seleccionada no existe.', TRUE);
+        ELSIF SQLCODE = 100 THEN
+            RAISE_APPLICATION_ERROR(-20013, 'Registro no encontrado (VERIFICAR_DESPACHAR_ITEM).', TRUE);
+        ELSE
+            RAISE_APPLICATION_ERROR(-20014, SUBSTR('Error en VERIFICAR_DESPACHAR_ITEM: ' || SQLERRM, 1, 500), TRUE);
+        END IF;
 END;
 
 
@@ -1125,6 +1896,22 @@ BEGIN
     WHERE ID_OT = p_id_ot;
 
     COMMIT;
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+        IF SQLCODE BETWEEN -20999 AND -20000 THEN
+            RAISE;
+        ELSIF SQLCODE = -1 THEN
+            RAISE_APPLICATION_ERROR(-20010, 'Registro duplicado (CONFIRMAR_SALIDA_OT).', TRUE);
+        ELSIF SQLCODE = -2292 THEN
+            RAISE_APPLICATION_ERROR(-20011, 'No se puede eliminar o modificar: existen registros asociados.', TRUE);
+        ELSIF SQLCODE = -2291 THEN
+            RAISE_APPLICATION_ERROR(-20012, 'La referencia seleccionada no existe.', TRUE);
+        ELSIF SQLCODE = 100 THEN
+            RAISE_APPLICATION_ERROR(-20013, 'Registro no encontrado (CONFIRMAR_SALIDA_OT).', TRUE);
+        ELSE
+            RAISE_APPLICATION_ERROR(-20014, SUBSTR('Error en CONFIRMAR_SALIDA_OT: ' || SQLERRM, 1, 500), TRUE);
+        END IF;
 END;
 
 
@@ -1160,6 +1947,22 @@ BEGIN
     WHERE ID_DETALLE = p_id_detalle;
 
     COMMIT;
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+        IF SQLCODE BETWEEN -20999 AND -20000 THEN
+            RAISE;
+        ELSIF SQLCODE = -1 THEN
+            RAISE_APPLICATION_ERROR(-20010, 'Registro duplicado (REGISTRAR_RETORNO_ITEM).', TRUE);
+        ELSIF SQLCODE = -2292 THEN
+            RAISE_APPLICATION_ERROR(-20011, 'No se puede eliminar o modificar: existen registros asociados.', TRUE);
+        ELSIF SQLCODE = -2291 THEN
+            RAISE_APPLICATION_ERROR(-20012, 'La referencia seleccionada no existe.', TRUE);
+        ELSIF SQLCODE = 100 THEN
+            RAISE_APPLICATION_ERROR(-20013, 'Registro no encontrado (REGISTRAR_RETORNO_ITEM).', TRUE);
+        ELSE
+            RAISE_APPLICATION_ERROR(-20014, SUBSTR('Error en REGISTRAR_RETORNO_ITEM: ' || SQLERRM, 1, 500), TRUE);
+        END IF;
 END;
 
 
@@ -1193,6 +1996,23 @@ BEGIN
     WHERE ID_OT = p_id_ot;
 
     COMMIT;
+EXCEPTION
+    WHEN OTHERS THEN
+        IF c_consumibles%ISOPEN THEN CLOSE c_consumibles; END IF;
+        ROLLBACK;
+        IF SQLCODE BETWEEN -20999 AND -20000 THEN
+            RAISE;
+        ELSIF SQLCODE = -1 THEN
+            RAISE_APPLICATION_ERROR(-20010, 'Registro duplicado (CERRAR_ORDEN_TRABAJO).', TRUE);
+        ELSIF SQLCODE = -2292 THEN
+            RAISE_APPLICATION_ERROR(-20011, 'No se puede eliminar o modificar: existen registros asociados.', TRUE);
+        ELSIF SQLCODE = -2291 THEN
+            RAISE_APPLICATION_ERROR(-20012, 'La referencia seleccionada no existe.', TRUE);
+        ELSIF SQLCODE = 100 THEN
+            RAISE_APPLICATION_ERROR(-20013, 'Registro no encontrado (CERRAR_ORDEN_TRABAJO).', TRUE);
+        ELSE
+            RAISE_APPLICATION_ERROR(-20014, SUBSTR('Error en CERRAR_ORDEN_TRABAJO: ' || SQLERRM, 1, 500), TRUE);
+        END IF;
 END;
 
 
@@ -1224,6 +2044,22 @@ BEGIN
     END IF;
 
     COMMIT;
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+        IF SQLCODE BETWEEN -20999 AND -20000 THEN
+            RAISE;
+        ELSIF SQLCODE = -1 THEN
+            RAISE_APPLICATION_ERROR(-20010, 'Registro duplicado (REGISTRAR_MANTENCION).', TRUE);
+        ELSIF SQLCODE = -2292 THEN
+            RAISE_APPLICATION_ERROR(-20011, 'No se puede eliminar o modificar: existen registros asociados.', TRUE);
+        ELSIF SQLCODE = -2291 THEN
+            RAISE_APPLICATION_ERROR(-20012, 'La referencia seleccionada no existe.', TRUE);
+        ELSIF SQLCODE = 100 THEN
+            RAISE_APPLICATION_ERROR(-20013, 'Registro no encontrado (REGISTRAR_MANTENCION).', TRUE);
+        ELSE
+            RAISE_APPLICATION_ERROR(-20014, SUBSTR('Error en REGISTRAR_MANTENCION: ' || SQLERRM, 1, 500), TRUE);
+        END IF;
 END;
 
 
@@ -1244,6 +2080,22 @@ BEGIN
         );
         COMMIT;
     END IF;
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+        IF SQLCODE BETWEEN -20999 AND -20000 THEN
+            RAISE;
+        ELSIF SQLCODE = -1 THEN
+            RAISE_APPLICATION_ERROR(-20010, 'Registro duplicado (GENERAR_REQ_COMPRA).', TRUE);
+        ELSIF SQLCODE = -2292 THEN
+            RAISE_APPLICATION_ERROR(-20011, 'No se puede eliminar o modificar: existen registros asociados.', TRUE);
+        ELSIF SQLCODE = -2291 THEN
+            RAISE_APPLICATION_ERROR(-20012, 'La referencia seleccionada no existe.', TRUE);
+        ELSIF SQLCODE = 100 THEN
+            RAISE_APPLICATION_ERROR(-20013, 'Registro no encontrado (GENERAR_REQ_COMPRA).', TRUE);
+        ELSE
+            RAISE_APPLICATION_ERROR(-20014, SUBSTR('Error en GENERAR_REQ_COMPRA: ' || SQLERRM, 1, 500), TRUE);
+        END IF;
 END;
 
 
@@ -1257,6 +2109,22 @@ BEGIN
     WHERE ID_REQUERIMIENTO = p_id_requerimiento;
 
     COMMIT;
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+        IF SQLCODE BETWEEN -20999 AND -20000 THEN
+            RAISE;
+        ELSIF SQLCODE = -1 THEN
+            RAISE_APPLICATION_ERROR(-20010, 'Registro duplicado (ACTUALIZAR_ESTADO_COMPRA).', TRUE);
+        ELSIF SQLCODE = -2292 THEN
+            RAISE_APPLICATION_ERROR(-20011, 'No se puede eliminar o modificar: existen registros asociados.', TRUE);
+        ELSIF SQLCODE = -2291 THEN
+            RAISE_APPLICATION_ERROR(-20012, 'La referencia seleccionada no existe.', TRUE);
+        ELSIF SQLCODE = 100 THEN
+            RAISE_APPLICATION_ERROR(-20013, 'Registro no encontrado (ACTUALIZAR_ESTADO_COMPRA).', TRUE);
+        ELSE
+            RAISE_APPLICATION_ERROR(-20014, SUBSTR('Error en ACTUALIZAR_ESTADO_COMPRA: ' || SQLERRM, 1, 500), TRUE);
+        END IF;
 END;
 
 
@@ -1285,6 +2153,21 @@ BEGIN
         LEFT JOIN UNIDADES_EQUIPOS u ON d.ID_UNIDAD = u.ID_UNIDAD
         WHERE FN_NO_RETORNADO(d.ID_DETALLE) > 0
         ORDER BY ot.FECHA_SALIDA, ot.NRO_OT;
+EXCEPTION
+    WHEN OTHERS THEN
+        IF SQLCODE BETWEEN -20999 AND -20000 THEN
+            RAISE;
+        ELSIF SQLCODE = -1 THEN
+            RAISE_APPLICATION_ERROR(-20010, 'Registro duplicado (REPORTE_FUERA_BODEGA).', TRUE);
+        ELSIF SQLCODE = -2292 THEN
+            RAISE_APPLICATION_ERROR(-20011, 'No se puede eliminar o modificar: existen registros asociados.', TRUE);
+        ELSIF SQLCODE = -2291 THEN
+            RAISE_APPLICATION_ERROR(-20012, 'La referencia seleccionada no existe.', TRUE);
+        ELSIF SQLCODE = 100 THEN
+            RAISE_APPLICATION_ERROR(-20013, 'Registro no encontrado (REPORTE_FUERA_BODEGA).', TRUE);
+        ELSE
+            RAISE_APPLICATION_ERROR(-20014, SUBSTR('Error en REPORTE_FUERA_BODEGA: ' || SQLERRM, 1, 500), TRUE);
+        END IF;
 END;
 
 
@@ -1310,6 +2193,21 @@ BEGIN
            OR FN_NO_RETORNADO(d.ID_DETALLE) > 0
            OR rc.ESTADO IN ('Solicitado', 'Comprado')
         ORDER BY ot.NRO_OT, i.NOMBRE;
+EXCEPTION
+    WHEN OTHERS THEN
+        IF SQLCODE BETWEEN -20999 AND -20000 THEN
+            RAISE;
+        ELSIF SQLCODE = -1 THEN
+            RAISE_APPLICATION_ERROR(-20010, 'Registro duplicado (REPORTE_PENDIENTES_FALTANTES).', TRUE);
+        ELSIF SQLCODE = -2292 THEN
+            RAISE_APPLICATION_ERROR(-20011, 'No se puede eliminar o modificar: existen registros asociados.', TRUE);
+        ELSIF SQLCODE = -2291 THEN
+            RAISE_APPLICATION_ERROR(-20012, 'La referencia seleccionada no existe.', TRUE);
+        ELSIF SQLCODE = 100 THEN
+            RAISE_APPLICATION_ERROR(-20013, 'Registro no encontrado (REPORTE_PENDIENTES_FALTANTES).', TRUE);
+        ELSE
+            RAISE_APPLICATION_ERROR(-20014, SUBSTR('Error en REPORTE_PENDIENTES_FALTANTES: ' || SQLERRM, 1, 500), TRUE);
+        END IF;
 END;
 
 
@@ -1340,6 +2238,21 @@ BEGIN
                  i.NOMBRE,
                  i.UNIDAD
         ORDER BY MES DESC, cl.RAZON_SOCIAL, ot.NRO_OT;
+EXCEPTION
+    WHEN OTHERS THEN
+        IF SQLCODE BETWEEN -20999 AND -20000 THEN
+            RAISE;
+        ELSIF SQLCODE = -1 THEN
+            RAISE_APPLICATION_ERROR(-20010, 'Registro duplicado (REPORTE_CONSUMO_MENSUAL).', TRUE);
+        ELSIF SQLCODE = -2292 THEN
+            RAISE_APPLICATION_ERROR(-20011, 'No se puede eliminar o modificar: existen registros asociados.', TRUE);
+        ELSIF SQLCODE = -2291 THEN
+            RAISE_APPLICATION_ERROR(-20012, 'La referencia seleccionada no existe.', TRUE);
+        ELSIF SQLCODE = 100 THEN
+            RAISE_APPLICATION_ERROR(-20013, 'Registro no encontrado (REPORTE_CONSUMO_MENSUAL).', TRUE);
+        ELSE
+            RAISE_APPLICATION_ERROR(-20014, SUBSTR('Error en REPORTE_CONSUMO_MENSUAL: ' || SQLERRM, 1, 500), TRUE);
+        END IF;
 END;
 
 
@@ -1483,6 +2396,21 @@ BEGIN
         LEFT JOIN ORDENES_TRABAJO ot ON a.ID_OT = ot.ID_OT
         LEFT JOIN UNIDADES_EQUIPOS u ON a.ID_UNIDAD = u.ID_UNIDAD
         ORDER BY a.ATENDIDA ASC, a.FECHA DESC;
+EXCEPTION
+    WHEN OTHERS THEN
+        IF SQLCODE BETWEEN -20999 AND -20000 THEN
+            RAISE;
+        ELSIF SQLCODE = -1 THEN
+            RAISE_APPLICATION_ERROR(-20010, 'Registro duplicado (LISTAR_ALERTAS).', TRUE);
+        ELSIF SQLCODE = -2292 THEN
+            RAISE_APPLICATION_ERROR(-20011, 'No se puede eliminar o modificar: existen registros asociados.', TRUE);
+        ELSIF SQLCODE = -2291 THEN
+            RAISE_APPLICATION_ERROR(-20012, 'La referencia seleccionada no existe.', TRUE);
+        ELSIF SQLCODE = 100 THEN
+            RAISE_APPLICATION_ERROR(-20013, 'Registro no encontrado (LISTAR_ALERTAS).', TRUE);
+        ELSE
+            RAISE_APPLICATION_ERROR(-20014, SUBSTR('Error en LISTAR_ALERTAS: ' || SQLERRM, 1, 500), TRUE);
+        END IF;
 END;
 
 
@@ -1492,6 +2420,22 @@ CREATE OR REPLACE PROCEDURE ATENDER_ALERTA (
 BEGIN
     UPDATE ALERTAS SET ATENDIDA = 'S' WHERE ID_ALERTA = p_id_alerta;
     COMMIT;
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+        IF SQLCODE BETWEEN -20999 AND -20000 THEN
+            RAISE;
+        ELSIF SQLCODE = -1 THEN
+            RAISE_APPLICATION_ERROR(-20010, 'Registro duplicado (ATENDER_ALERTA).', TRUE);
+        ELSIF SQLCODE = -2292 THEN
+            RAISE_APPLICATION_ERROR(-20011, 'No se puede eliminar o modificar: existen registros asociados.', TRUE);
+        ELSIF SQLCODE = -2291 THEN
+            RAISE_APPLICATION_ERROR(-20012, 'La referencia seleccionada no existe.', TRUE);
+        ELSIF SQLCODE = 100 THEN
+            RAISE_APPLICATION_ERROR(-20013, 'Registro no encontrado (ATENDER_ALERTA).', TRUE);
+        ELSE
+            RAISE_APPLICATION_ERROR(-20014, SUBSTR('Error en ATENDER_ALERTA: ' || SQLERRM, 1, 500), TRUE);
+        END IF;
 END;
 
 
@@ -1504,6 +2448,21 @@ BEGIN
                VALOR_ANTERIOR, VALOR_NUEVO, USUARIO_BD, FECHA, ID_USUARIO
         FROM BITACORAS
         ORDER BY FECHA DESC;
+EXCEPTION
+    WHEN OTHERS THEN
+        IF SQLCODE BETWEEN -20999 AND -20000 THEN
+            RAISE;
+        ELSIF SQLCODE = -1 THEN
+            RAISE_APPLICATION_ERROR(-20010, 'Registro duplicado (LISTAR_BITACORAS).', TRUE);
+        ELSIF SQLCODE = -2292 THEN
+            RAISE_APPLICATION_ERROR(-20011, 'No se puede eliminar o modificar: existen registros asociados.', TRUE);
+        ELSIF SQLCODE = -2291 THEN
+            RAISE_APPLICATION_ERROR(-20012, 'La referencia seleccionada no existe.', TRUE);
+        ELSIF SQLCODE = 100 THEN
+            RAISE_APPLICATION_ERROR(-20013, 'Registro no encontrado (LISTAR_BITACORAS).', TRUE);
+        ELSE
+            RAISE_APPLICATION_ERROR(-20014, SUBSTR('Error en LISTAR_BITACORAS: ' || SQLERRM, 1, 500), TRUE);
+        END IF;
 END;
 
 
@@ -1517,6 +2476,22 @@ BEGIN
     INSERT INTO PLANTILLAS_ITEMS (ID_TIPO_TRABAJO, ID_ITEM, CANTIDAD_ESTANDAR)
     VALUES (p_id_tipo_trabajo, p_id_item, p_cantidad_estandar);
     COMMIT;
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+        IF SQLCODE BETWEEN -20999 AND -20000 THEN
+            RAISE;
+        ELSIF SQLCODE = -1 THEN
+            RAISE_APPLICATION_ERROR(-20010, 'Registro duplicado (INSERTAR_PLANTILLA_ITEM).', TRUE);
+        ELSIF SQLCODE = -2292 THEN
+            RAISE_APPLICATION_ERROR(-20011, 'No se puede eliminar o modificar: existen registros asociados.', TRUE);
+        ELSIF SQLCODE = -2291 THEN
+            RAISE_APPLICATION_ERROR(-20012, 'La referencia seleccionada no existe.', TRUE);
+        ELSIF SQLCODE = 100 THEN
+            RAISE_APPLICATION_ERROR(-20013, 'Registro no encontrado (INSERTAR_PLANTILLA_ITEM).', TRUE);
+        ELSE
+            RAISE_APPLICATION_ERROR(-20014, SUBSTR('Error en INSERTAR_PLANTILLA_ITEM: ' || SQLERRM, 1, 500), TRUE);
+        END IF;
 END;
 
 
@@ -1530,6 +2505,22 @@ BEGIN
     SET CANTIDAD_ESTANDAR = p_cantidad_estandar
     WHERE ID_TIPO_TRABAJO = p_id_tipo_trabajo AND ID_ITEM = p_id_item;
     COMMIT;
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+        IF SQLCODE BETWEEN -20999 AND -20000 THEN
+            RAISE;
+        ELSIF SQLCODE = -1 THEN
+            RAISE_APPLICATION_ERROR(-20010, 'Registro duplicado (ACTUALIZAR_PLANTILLA_ITEM).', TRUE);
+        ELSIF SQLCODE = -2292 THEN
+            RAISE_APPLICATION_ERROR(-20011, 'No se puede eliminar o modificar: existen registros asociados.', TRUE);
+        ELSIF SQLCODE = -2291 THEN
+            RAISE_APPLICATION_ERROR(-20012, 'La referencia seleccionada no existe.', TRUE);
+        ELSIF SQLCODE = 100 THEN
+            RAISE_APPLICATION_ERROR(-20013, 'Registro no encontrado (ACTUALIZAR_PLANTILLA_ITEM).', TRUE);
+        ELSE
+            RAISE_APPLICATION_ERROR(-20014, SUBSTR('Error en ACTUALIZAR_PLANTILLA_ITEM: ' || SQLERRM, 1, 500), TRUE);
+        END IF;
 END;
 
 
@@ -1541,6 +2532,22 @@ BEGIN
     DELETE FROM PLANTILLAS_ITEMS
     WHERE ID_TIPO_TRABAJO = p_id_tipo_trabajo AND ID_ITEM = p_id_item;
     COMMIT;
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+        IF SQLCODE BETWEEN -20999 AND -20000 THEN
+            RAISE;
+        ELSIF SQLCODE = -1 THEN
+            RAISE_APPLICATION_ERROR(-20010, 'Registro duplicado (ELIMINAR_PLANTILLA_ITEM).', TRUE);
+        ELSIF SQLCODE = -2292 THEN
+            RAISE_APPLICATION_ERROR(-20011, 'No se puede eliminar o modificar: existen registros asociados.', TRUE);
+        ELSIF SQLCODE = -2291 THEN
+            RAISE_APPLICATION_ERROR(-20012, 'La referencia seleccionada no existe.', TRUE);
+        ELSIF SQLCODE = 100 THEN
+            RAISE_APPLICATION_ERROR(-20013, 'Registro no encontrado (ELIMINAR_PLANTILLA_ITEM).', TRUE);
+        ELSE
+            RAISE_APPLICATION_ERROR(-20014, SUBSTR('Error en ELIMINAR_PLANTILLA_ITEM: ' || SQLERRM, 1, 500), TRUE);
+        END IF;
 END;
 
 CREATE OR REPLACE PROCEDURE LISTAR_PLANTILLA_ITEM (
@@ -1551,6 +2558,21 @@ BEGIN
         SELECT ID_TIPO_TRABAJO, ID_ITEM, CANTIDAD_ESTANDAR
         FROM PLANTILLAS_ITEMS
         ORDER BY ID_TIPO_TRABAJO, ID_ITEM;
+EXCEPTION
+    WHEN OTHERS THEN
+        IF SQLCODE BETWEEN -20999 AND -20000 THEN
+            RAISE;
+        ELSIF SQLCODE = -1 THEN
+            RAISE_APPLICATION_ERROR(-20010, 'Registro duplicado (LISTAR_PLANTILLA_ITEM).', TRUE);
+        ELSIF SQLCODE = -2292 THEN
+            RAISE_APPLICATION_ERROR(-20011, 'No se puede eliminar o modificar: existen registros asociados.', TRUE);
+        ELSIF SQLCODE = -2291 THEN
+            RAISE_APPLICATION_ERROR(-20012, 'La referencia seleccionada no existe.', TRUE);
+        ELSIF SQLCODE = 100 THEN
+            RAISE_APPLICATION_ERROR(-20013, 'Registro no encontrado (LISTAR_PLANTILLA_ITEM).', TRUE);
+        ELSE
+            RAISE_APPLICATION_ERROR(-20014, SUBSTR('Error en LISTAR_PLANTILLA_ITEM: ' || SQLERRM, 1, 500), TRUE);
+        END IF;
 END;
 
 
@@ -1564,6 +2586,21 @@ BEGIN
                NRO_OT, FECHA_SALIDA, FECHA_RETORNO_PREVISTA, FECHA_RETORNO, ESTADO
         FROM ORDENES_TRABAJO
         ORDER BY ID_OT;
+EXCEPTION
+    WHEN OTHERS THEN
+        IF SQLCODE BETWEEN -20999 AND -20000 THEN
+            RAISE;
+        ELSIF SQLCODE = -1 THEN
+            RAISE_APPLICATION_ERROR(-20010, 'Registro duplicado (LISTAR_ORDEN_TRABAJO).', TRUE);
+        ELSIF SQLCODE = -2292 THEN
+            RAISE_APPLICATION_ERROR(-20011, 'No se puede eliminar o modificar: existen registros asociados.', TRUE);
+        ELSIF SQLCODE = -2291 THEN
+            RAISE_APPLICATION_ERROR(-20012, 'La referencia seleccionada no existe.', TRUE);
+        ELSIF SQLCODE = 100 THEN
+            RAISE_APPLICATION_ERROR(-20013, 'Registro no encontrado (LISTAR_ORDEN_TRABAJO).', TRUE);
+        ELSE
+            RAISE_APPLICATION_ERROR(-20014, SUBSTR('Error en LISTAR_ORDEN_TRABAJO: ' || SQLERRM, 1, 500), TRUE);
+        END IF;
 END;
 
 
@@ -1573,9 +2610,27 @@ CREATE OR REPLACE PROCEDURE LISTAR_DETALLE_CHECKLIST (
 BEGIN
     OPEN p_cursor FOR
         SELECT ID_DETALLE, ID_OT, ID_ITEM, ID_UNIDAD, CANTIDAD_REQUERIDA, CANTIDAD_DESPACHADA,
-               CANTIDAD_RETORNADA, ESTADO_ITEM, OBSERVACION, VERIFICADO, FECHA_VERIFICACION
+               CANTIDAD_RETORNADA, ESTADO_ITEM, OBSERVACION, VERIFICADO, FECHA_VERIFICACION,
+               FN_POR_DESPACHAR(ID_DETALLE) AS POR_DESPACHAR,
+               FN_NO_RETORNADO(ID_DETALLE) AS NO_RETORNADO,
+               FN_POR_DESPACHAR(ID_DETALLE) + FN_NO_RETORNADO(ID_DETALLE) AS CANTIDAD_COMPRA
         FROM DETALLES_CHECKLIST
         ORDER BY ID_DETALLE;
+EXCEPTION
+    WHEN OTHERS THEN
+        IF SQLCODE BETWEEN -20999 AND -20000 THEN
+            RAISE;
+        ELSIF SQLCODE = -1 THEN
+            RAISE_APPLICATION_ERROR(-20010, 'Registro duplicado (LISTAR_DETALLE_CHECKLIST).', TRUE);
+        ELSIF SQLCODE = -2292 THEN
+            RAISE_APPLICATION_ERROR(-20011, 'No se puede eliminar o modificar: existen registros asociados.', TRUE);
+        ELSIF SQLCODE = -2291 THEN
+            RAISE_APPLICATION_ERROR(-20012, 'La referencia seleccionada no existe.', TRUE);
+        ELSIF SQLCODE = 100 THEN
+            RAISE_APPLICATION_ERROR(-20013, 'Registro no encontrado (LISTAR_DETALLE_CHECKLIST).', TRUE);
+        ELSE
+            RAISE_APPLICATION_ERROR(-20014, SUBSTR('Error en LISTAR_DETALLE_CHECKLIST: ' || SQLERRM, 1, 500), TRUE);
+        END IF;
 END;
 
 
@@ -1587,6 +2642,21 @@ BEGIN
         SELECT ID_MANTENCION, ID_UNIDAD, TIPO, FECHA, FECHA_PROXIMA, OBSERVACION
         FROM MANTENCIONES
         ORDER BY ID_MANTENCION;
+EXCEPTION
+    WHEN OTHERS THEN
+        IF SQLCODE BETWEEN -20999 AND -20000 THEN
+            RAISE;
+        ELSIF SQLCODE = -1 THEN
+            RAISE_APPLICATION_ERROR(-20010, 'Registro duplicado (LISTAR_MANTENCION).', TRUE);
+        ELSIF SQLCODE = -2292 THEN
+            RAISE_APPLICATION_ERROR(-20011, 'No se puede eliminar o modificar: existen registros asociados.', TRUE);
+        ELSIF SQLCODE = -2291 THEN
+            RAISE_APPLICATION_ERROR(-20012, 'La referencia seleccionada no existe.', TRUE);
+        ELSIF SQLCODE = 100 THEN
+            RAISE_APPLICATION_ERROR(-20013, 'Registro no encontrado (LISTAR_MANTENCION).', TRUE);
+        ELSE
+            RAISE_APPLICATION_ERROR(-20014, SUBSTR('Error en LISTAR_MANTENCION: ' || SQLERRM, 1, 500), TRUE);
+        END IF;
 END;
 
 
@@ -1598,11 +2668,43 @@ BEGIN
         SELECT ID_REQUERIMIENTO, ID_DETALLE, ID_PROVEEDOR, CANTIDAD, ESTADO, FECHA
         FROM REQUERIMIENTOS_COMPRA
         ORDER BY ID_REQUERIMIENTO;
+EXCEPTION
+    WHEN OTHERS THEN
+        IF SQLCODE BETWEEN -20999 AND -20000 THEN
+            RAISE;
+        ELSIF SQLCODE = -1 THEN
+            RAISE_APPLICATION_ERROR(-20010, 'Registro duplicado (LISTAR_REQ_COMPRA).', TRUE);
+        ELSIF SQLCODE = -2292 THEN
+            RAISE_APPLICATION_ERROR(-20011, 'No se puede eliminar o modificar: existen registros asociados.', TRUE);
+        ELSIF SQLCODE = -2291 THEN
+            RAISE_APPLICATION_ERROR(-20012, 'La referencia seleccionada no existe.', TRUE);
+        ELSIF SQLCODE = 100 THEN
+            RAISE_APPLICATION_ERROR(-20013, 'Registro no encontrado (LISTAR_REQ_COMPRA).', TRUE);
+        ELSE
+            RAISE_APPLICATION_ERROR(-20014, SUBSTR('Error en LISTAR_REQ_COMPRA: ' || SQLERRM, 1, 500), TRUE);
+        END IF;
 END;
 
 
+CREATE OR REPLACE PROCEDURE OBTENER_CREDENCIAL (
+    p_username IN VARCHAR2,
+    p_cursor OUT SYS_REFCURSOR
+) AS
+BEGIN
+    OPEN p_cursor FOR
+        SELECT u.ID_USUARIO, u.USERNAME, u.ID_ROL, r.NOMBRE_ROL AS ROL,
+               u.ID_PERSONAL, p.NOMBRE AS NOMBRE_PERSONA, u.PASSWORD_HASH
+        FROM USUARIOS u
+        JOIN ROLES r ON u.ID_ROL = r.ID_ROL
+        LEFT JOIN PERSONALES p ON u.ID_PERSONAL = p.ID_PERSONAL
+        WHERE u.USERNAME = p_username AND u.ESTADO = 'A';
+EXCEPTION
+    WHEN OTHERS THEN
+        RAISE_APPLICATION_ERROR(-20014, 'Error consultando credenciales.', TRUE);
+END;
+
 -- VERIFICACION: los conteos esperados son 18 tablas, 17 secuencias,
--- 67 procedimientos, 2 funciones, 6 triggers (en un esquema dedicado vacio).
+-- 68 procedimientos, 2 funciones, 6 triggers (en un esquema dedicado vacio).
 SELECT OBJECT_TYPE, COUNT(*) AS TOTAL FROM USER_OBJECTS
 WHERE OBJECT_TYPE IN ('TABLE','SEQUENCE','PROCEDURE','FUNCTION','TRIGGER')
 GROUP BY OBJECT_TYPE ORDER BY OBJECT_TYPE;
@@ -1613,8 +2715,10 @@ WHERE STATUS <> 'VALID' ORDER BY OBJECT_TYPE, OBJECT_NAME;
 SELECT NAME, TYPE, LINE, POSITION, TEXT FROM USER_ERRORS
 WHERE ATTRIBUTE = 'ERROR' ORDER BY NAME, TYPE, SEQUENCE;
 
-SELECT CONSTRAINT_TYPE, COUNT(*) AS TOTAL FROM USER_CONSTRAINTS
-WHERE CONSTRAINT_TYPE IN ('P','R','U') GROUP BY CONSTRAINT_TYPE ORDER BY CONSTRAINT_TYPE;
+SELECT c.CONSTRAINT_TYPE, COUNT(*) AS TOTAL FROM USER_CONSTRAINTS c
+JOIN USER_TABLES t ON t.TABLE_NAME = c.TABLE_NAME
+WHERE c.CONSTRAINT_TYPE IN ('P','R','U') AND t.TABLE_NAME NOT LIKE 'BIN$%'
+GROUP BY c.CONSTRAINT_TYPE ORDER BY c.CONSTRAINT_TYPE;
 -- Esperado: P=18, R=21, U=10 (en esquema dedicado).
 
 SELECT CONSTRAINT_NAME, TABLE_NAME, R_CONSTRAINT_NAME, DELETE_RULE, STATUS

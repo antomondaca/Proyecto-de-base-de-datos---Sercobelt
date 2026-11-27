@@ -21,25 +21,73 @@ export class ApiError extends Error {
 // La operación sí se guardó en Oracle, pero falló la recarga posterior de datos
 export class RefreshError extends Error {}
 
-let csrfToken = ''
-let dataEpoch = 0
 let onUnauthorized: (() => void) | null = null
 export const setUnauthorizedHandler = (fn: (() => void) | null) => { onUnauthorized = fn }
 
+
+let csrfToken = ''
+
 async function req(path: string, init?: RequestInit) {
   let r: Response
+
   const headers = new Headers(init?.headers)
-  if (csrfToken && init?.method && init.method !== 'GET') headers.set('X-CSRF-Token', csrfToken)
-  try { r = await fetch(API + path, { ...init, headers, credentials: 'include', cache: 'no-store' }) } catch { throw new ApiError('No se pudo conectar con Flask (' + API + ')', 0) }
-  const j = await r.json().catch(() => ({}))
-  if (!r.ok) {
-    if (r.status === 401 && path !== '/login' && path !== '/session') onUnauthorized?.()
-    if (r.status === 403) throw new ApiError(j.error ?? 'Acceso denegado: su perfil no tiene permiso para esta operación', 403)
-    throw new ApiError(j.error ?? 'Error del servidor', r.status)
+
+  const method = (init?.method ?? 'GET').toUpperCase()
+
+  if (method !== 'GET' && method !== 'HEAD' && path !== '/login') {
+    if (csrfToken) {
+      headers.set('X-CSRF-Token', csrfToken)
+    }
   }
+
+  try {
+    r = await fetch(API + path, {
+      ...init,
+      headers,
+      credentials: 'include',
+    })
+  } catch {
+    throw new ApiError(
+      'No se pudo conectar con Flask (' + API + ')',
+      0
+    )
+  }
+
+  const j = await r.json().catch(() => ({}))
+
+  if (!r.ok) {
+    if (r.status === 401 && path !== '/login') {
+      csrfToken = ''
+      onUnauthorized?.()
+    }
+
+    if (r.status === 403) {
+      throw new ApiError(
+        j.error ?? 'Acceso denegado: su perfil no tiene permiso para esta operación',
+        403
+      )
+    }
+
+    throw new ApiError(
+      j.error ?? 'Error del servidor',
+      r.status
+    )
+  }
+
+  if ((path === '/login' || path === '/session') &&
+      typeof j.csrf === 'string') {
+    csrfToken = j.csrf
+  }
+
+  if (path === '/logout') {
+    csrfToken = ''
+  }
+
   return j
 }
 
+
+export const hash = (s: string) => 'sha$' + btoa(unescape(encodeURIComponent(s)))
 
 // ---- Cache de lectura (se rellena con los procedimientos LISTAR_ de Oracle)
 const empty = (): DB => Object.fromEntries(Object.keys(PK).map((k) => [k, []])) as unknown as DB
@@ -68,16 +116,14 @@ export function listasParaRol(rol: string): T[] {
   return []
 }
 let currentRol = ''
-export const clearData = () => { currentRol = ''; csrfToken = ''; dataEpoch++; db = empty(); subs.forEach((s) => s()) }
+export const clearData = () => { currentRol = ''; db = empty(); subs.forEach((s) => s()) }
 
 export async function loadAll(rol: string = currentRol) {
   currentRol = rol
-  const epoch = dataEpoch
   const tablas = listasParaRol(rol)
   const datos = await Promise.all(tablas.map((t) => listar(t)))
   const next = empty()
   tablas.forEach((t, i) => { next[t] = datos[i].map((r) => norm(t, r)) })
-  if (epoch !== dataEpoch) return
   db = next
   subs.forEach((s) => s())
 }
@@ -93,19 +139,22 @@ const refresh = async () => {
 const call = async (proc: string, args: any[]) => { await exec(proc, args); await refresh(); return [] as string[] }
 
 export async function spLogin(username: string, password: string) {
-  const u = await req('/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username, password }) })
-  csrfToken = u.csrf
-  return u
-}
-export async function getSession() {
   try {
-    const u = await req('/session')
-    csrfToken = u.csrf
-    return u
-  } catch (e) { if (e instanceof ApiError && e.status === 401) return null; throw e }
+    return await req('/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        username,
+        password
+      })
+    })
+  } catch (e) {
+    if ((e as Error).message.startsWith('Credenciales')) return null;
+    throw e
+  }
 }
-export const spLogout = () => req('/logout', { method: 'POST' })
-
 // ---- Mantenedores: columnas (sin la clave) en el orden de los parametros de INSERTAR_/ACTUALIZAR_
 const COLS: Partial<Record<T, string[]>> = {
   ROL: ['NOMBRE_ROL'], PERSONAL: ['RUT', 'NOMBRE', 'CARGO', 'ESTADO'], CLIENTE: ['RUT', 'RAZON_SOCIAL', 'CONTACTO', 'EMAIL', 'TELEFONO'],
@@ -130,9 +179,8 @@ export const verificarDespacharItem = (id: number, unidad: number | null, cant: 
   call('VERIFICAR_DESPACHAR_ITEM', [id, unidad, cant, obs])
 export const confirmarSalidaOt = (id: number) => call('CONFIRMAR_SALIDA_OT', [id])
 export const registrarRetornoLote = async (rows: { id: number; cant: number; obs: string | null }[]) => {
-  let hechos = 0
-  try { for (const r of rows) { await exec('REGISTRAR_RETORNO_ITEM', [r.id, r.cant, r.obs]); hechos++ } }
-  catch (e) { await loadAll().catch(() => {}); throw new Error(`Retorno interrumpido: ${hechos} de ${rows.length} ítems confirmados. Revise los registros antes de reintentar. ${(e as Error).message}`) }
+  try { for (const r of rows) await exec('REGISTRAR_RETORNO_ITEM', [r.id, r.cant, r.obs]) }
+  catch (e) { await loadAll().catch(() => {}); throw e } // algunos ítems pudieron quedar registrados
   await refresh()
   return [] as string[]
 }
@@ -148,6 +196,6 @@ export const itemEsRetornable = (d: DB, det: Row) => {
   const item = d.ITEM.find((i) => i.ID_ITEM === det.ID_ITEM)
   return d.CATEGORIA_ITEM.find((c) => c.ID_CATEGORIA === item?.ID_CATEGORIA)?.ES_RETORNABLE === 'S'
 }
-// Resultados de las funciones Oracle retornados por LISTAR_DETALLE_CHECKLIST.
-export const fnPorDespachar = (det: Row) => Number(det.POR_DESPACHAR ?? 0)
-export const fnNoRetornado = (_d: DB, det: Row) => Number(det.NO_RETORNADO ?? 0)
+export const fnPorDespachar = (det: Row) => (det.CANTIDAD_REQUERIDA ?? 0) - (det.CANTIDAD_DESPACHADA ?? 0)
+export const fnNoRetornado = (d: DB, det: Row, retornada = det.CANTIDAD_RETORNADA) =>
+  itemEsRetornable(d, det) ? (det.CANTIDAD_DESPACHADA ?? 0) - (retornada ?? 0) : 0

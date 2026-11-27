@@ -1,13 +1,13 @@
 import { useState } from 'react'
 import { ShoppingCart } from 'lucide-react'
-import { actualizarEstadoCompra, generarReqCompra, useDB } from '../db'
+import { actualizarEstadoCompra, fnNoRetornado, fnPorDespachar, generarReqCompra, useDB } from '../db'
 import { useApp } from '../ctx'
 import { Badge, Field, btnPrimary, card, fmt, inputCls, th } from '../ui'
 
 export default function Compra() {
   const db = useDB()
   const { act } = useApp()
-  const cand = db.CHECKLIST_DETALLE.filter((d) => Number(d.CANTIDAD_COMPRA ?? 0) > 0 && db.ORDEN_TRABAJO.find((o) => o.ID_OT === d.ID_OT)?.ESTADO !== 'Borrador')
+  const cand = db.CHECKLIST_DETALLE.filter((d) => fnPorDespachar(d) + fnNoRetornado(db, d) > 0 && db.ORDEN_TRABAJO.find((o) => o.ID_OT === d.ID_OT)?.ESTADO !== 'Borrador')
   const [det, setDet] = useState('')
   const [prov, setProv] = useState(String(db.PROVEEDOR[0]?.ID_PROVEEDOR ?? ''))
   const lbl = (d: any) => `${db.ORDEN_TRABAJO.find((o) => o.ID_OT === d.ID_OT)?.NRO_OT} · ${db.ITEM.find((i) => i.ID_ITEM === d.ID_ITEM)?.NOMBRE}`
@@ -20,8 +20,8 @@ export default function Compra() {
         <div className="flex items-end gap-4">
           <div className="w-96"><Field label="ID_DETALLE (con faltante)"><select className={inputCls} value={cur} onChange={(e) => setDet(e.target.value)}>{cand.map((x) => <option key={x.ID_DETALLE} value={x.ID_DETALLE}>{lbl(x)}</option>)}</select></Field></div>
           <div className="w-64"><Field label="ID_PROVEEDOR"><select className={inputCls} value={prov} onChange={(e) => setProv(e.target.value)}>{db.PROVEEDOR.map((p) => <option key={p.ID_PROVEEDOR} value={p.ID_PROVEEDOR}>{p.RAZON_SOCIAL}</option>)}</select></Field></div>
-          <div className="pb-2 text-sm text-slate-600">CANTIDAD = <b>{d ? Number(d.CANTIDAD_COMPRA ?? 0) : 0}</b></div>
-          <button className={btnPrimary} disabled={!d || !prov} onClick={() => act('Requerimiento generado en estado Solicitado', () => generarReqCompra(Number(cur), Number(prov)))}><ShoppingCart size={16} />Generar</button>
+          <div className="pb-2 text-sm text-slate-600">CANTIDAD = <b>{d ? fnPorDespachar(d) + fnNoRetornado(db, d) : 0}</b></div>
+          <button className={btnPrimary} disabled={!d} onClick={() => act('Requerimiento generado en estado Solicitado', () => generarReqCompra(Number(cur), Number(prov)))}><ShoppingCart size={16} />Generar</button>
         </div>
       </section>
       <section className={`${card} overflow-x-auto`}>
